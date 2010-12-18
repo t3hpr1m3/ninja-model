@@ -1,0 +1,17 @@
+*~
+*.cache
+*.log
+*.pid
+tmp/**/*
+.DS_Store
+db/*.sqlite3
+doc/api
+doc/app
+doc/plugins
+doc/*.dot
+coverate/*
+*.sw?
+vendor/plugins/ns_web
+Gemfile.lock
+.bundle
+*.gem
