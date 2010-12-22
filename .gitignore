@@ -9,7 +9,7 @@ doc/api
 doc/app
 doc/plugins
 doc/*.dot
-coverate/*
+coverage/*
 *.sw?
 vendor/plugins/ns_web
 Gemfile.lock
