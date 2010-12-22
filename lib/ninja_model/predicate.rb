@@ -19,5 +19,22 @@ module NinjaModel
     def has_value?
       @valued
     end
+
+    def test(suspect)
+      case method
+      when :eq
+        suspect.eql?(value)
+      when :ne
+        suspect != value
+      when :gt
+        suspect > value
+      when :gte
+        suspect >= value
+      when :lt
+        suspect < value
+      when :lte
+        suspect <= value
+      end
+    end
   end
 end
