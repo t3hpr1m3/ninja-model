@@ -22,6 +22,7 @@ Rake::RDocTask.new do |r|
   r.rdoc_dir = 'doc/html'
   r.main = "README.md"
   r.rdoc_files.include('README.md', 'lib/**/*.rb')
+  r.rdoc_files.exclude('lib/generators/**/*')
 end
 
 namespace :spec do

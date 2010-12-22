@@ -3,6 +3,7 @@
 *.log
 *.pid
 tmp/**/*
+doc/*
 .DS_Store
 db/*.sqlite3
 doc/api

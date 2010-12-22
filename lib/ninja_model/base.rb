@@ -44,7 +44,7 @@ module NinjaModel
       end
 
       def scoped_methods
-        key = :"#{self}_scoped_methods"
+        key = "#{self}_scoped_methods".to_sym
         Thread.current[key] = Thread.current[key].presence || self.default_scoping.dup
       end
 
@@ -59,7 +59,7 @@ module NinjaModel
       end
 
       def reset_scoped_methods
-        Thread.current[:"#{self}_scoped_methods"] = nil
+        Thread.current["#{self}_scoped_methods".to_sym] = nil
       end
 
       private
