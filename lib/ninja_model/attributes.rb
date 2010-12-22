@@ -62,7 +62,7 @@ module NinjaModel
     end
 
     def read_attribute(name)
-      @attributes[name.to_s]
+      @attributes[name.to_sym]
     end
 
     protected
