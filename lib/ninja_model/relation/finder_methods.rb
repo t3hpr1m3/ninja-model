@@ -7,6 +7,16 @@ module NinjaModel
       end
     end
 
+    def last(*args)
+      if args.any?
+      else
+      end
+    end
+
+    def all(*args)
+      args.any? ? apply_finder_options(args.first).to_a : to_a
+    end
+
     protected
 
     def find_first
@@ -14,8 +24,6 @@ module NinjaModel
         @records.first
       else
         @first ||= limit(1).to_a[0]
-        puts "to_a returned: #{@first}"
-        @first
       end
     end
   end

@@ -3,6 +3,36 @@ require 'active_support'
 module NinjaModel
   module SpawnMethods
 
+    def merge(r)
+      merged_relation = clone
+      return merged_relation unless r
+      return to_a & r if r.is_a?(Array)
+
+      order_value = r.ordering
+      if order_value.present?
+        merged_relation.ordering = merged_relation.ordering + order_value
+      end
+
+      merged_predicates = @predicates + r.predicates
+
+      unless @predicates.empty?
+        seen = []
+        merged_predicates = merged_predicates.reverse.reject { |w|
+          nuke = false
+          if w.respond_to?(:operator) && w.operator == :==
+            attribute = w.attribute
+            nuke = seen[attribute]
+            seen[attribute] = true
+          end
+          nuke
+        }.reverse
+        merged_relation.predicates = merged_predicates
+      end
+
+      merged_relation
+
+    end
+
     VALID_FIND_OPTIONS = [:conditions, :limit, :offset, :order]
 
     def apply_finder_options(options)

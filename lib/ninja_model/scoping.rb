@@ -35,9 +35,9 @@ module NinjaModel
                      end
 
           extension ? relation.extending(extension) : relation
-
-          singleton_class.send(:redefine_method, name, &scopes[name])
         end
+
+        singleton_class.send(:redefine_method, name, &scopes[name])
       end
 
       def valid_scope_name?(name)

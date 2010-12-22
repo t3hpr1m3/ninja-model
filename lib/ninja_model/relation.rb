@@ -29,5 +29,29 @@ module NinjaModel
     def to_a
       @klass.adapter.read(self)
     end
+
+    def scoping
+      @klass.scoped_methods << self
+      begin
+        yield
+      ensure
+        @klass.scoped_methods.pop
+      end
+    end
+
+    protected
+
+    def method_missing(method, *args, &block)
+      if Array.method_defined?(method)
+        to_a.send(method, *args, &block)
+      elsif @klass.scopes[method]
+        merge(@klass.send(method, *args, &block))
+      elsif @klass.respond_to?(method)
+        raise StandardError, "#{@klass.inspect} responds to #{method}"
+        scoping { @klass.send(method, *args, &block) }
+      else
+        super
+      end
+    end
   end
 end
