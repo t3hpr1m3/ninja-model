@@ -55,7 +55,7 @@ module NinjaModel
 
       def current_scoped_methods
         last = scoped_methods.last
-        last.is_a?(Proc) ? unscoped(last) : last
+        last.is_a?(Proc) ? unscoped(&last) : last
       end
 
       def reset_scoped_methods
