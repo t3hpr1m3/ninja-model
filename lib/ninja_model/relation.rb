@@ -41,6 +41,10 @@ module NinjaModel
 
     protected
 
+    def inspect
+      to_a.inspect
+    end
+
     def method_missing(method, *args, &block)
       if Array.method_defined?(method)
         to_a.send(method, *args, &block)

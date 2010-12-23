@@ -42,7 +42,7 @@ module NinjaModel
 
       def valid_scope_name?(name)
         if !scopes[name] && respond_to?(name, true)
-          logger.warn "Creating scope :#{name}.  Overwriting existing method #{self.name}#{name}."
+          logger.warn "Creating scope :#{name}.  Overwriting existing method #{self.name}.#{name}."
         end
       end
     end

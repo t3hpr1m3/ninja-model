@@ -25,7 +25,7 @@ module NinjaModel
       when :eq
         suspect.eql?(value)
       when :ne
-        suspect != value
+        !suspect.eql?(value)
       when :gt
         suspect > value
       when :gte
