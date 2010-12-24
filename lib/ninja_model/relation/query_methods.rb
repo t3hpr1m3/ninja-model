@@ -41,17 +41,19 @@ module NinjaModel
 
           case k
           when NinjaModel::Predicate
-            k.value = v
+            k.value = klass.model_attributes[k.attribute].convert(v)
             k
-          when Symbol
+          when Symbol, String
             raise ArgumentError, "#{klass} doesn't have an attribute #{k}." unless klass.model_attributes.with_indifferent_access.key?(k)
-            p = NinjaModel::Predicate.new(k, :eq)
-            p.value = v
+            p = NinjaModel::Predicate.new(k.to_sym, :eq)
+            p.value = klass.model_attributes[p.attribute].convert(v)
             p
           else
             raise ArgumentError, "#{k} isn't a predicate or a symbol."
           end
         end
+      when NinjaModel::Predicate
+        [opts]
       else
         raise ArgumentError, "Unknown argument to #{self}.where: #{opts.inspect}"
       end

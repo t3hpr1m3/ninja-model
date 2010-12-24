@@ -36,6 +36,16 @@ module NinjaModel
 
       private
 
+      def clear_stale_cached_instances!
+        keys = @assigned_instances.keys - Thread.list.find_all { |t|
+          t.alive?
+        }.map { |thread| thread.object_id }
+        keys.each do |key|
+          checkin @assigned_instances[key]
+          @assigned_instances.delete(key)
+        end
+      end
+
       def checkout
         @instance_mutex.synchronize do
           loop do

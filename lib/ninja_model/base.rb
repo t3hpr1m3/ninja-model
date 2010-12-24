@@ -7,6 +7,8 @@ module NinjaModel
     include Scoping
     include Validation
     include Adapters
+    include Associations
+    include Reflection
     extend ActiveModel::Naming
 
     class_inheritable_accessor :default_scoping, :instance_writer => false
@@ -87,7 +89,6 @@ module NinjaModel
       @persisted = true
       self
     end
-
   end
 end
 

@@ -58,7 +58,7 @@ module NinjaModel
       def call(env)
         @app.call(env)
       ensure
-        unless env.key?('rask.test')
+        unless env.key?('rake.test')
           NinjaModel::Base.clear_active_instances!
         end
       end
