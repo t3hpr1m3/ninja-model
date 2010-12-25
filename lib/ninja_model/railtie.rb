@@ -18,10 +18,10 @@ module NinjaModel
         require 'erb'
         require 'yaml'
         app.config.ninja_model.specs = YAML::load(ERB.new(IO.read(config_path)).result)
+        NinjaModel::Base.set_adapter
       else
         NinjaModel.logger.warn "[ninja-model] *WARNING* Unable to find configuration file at #{config_path}"
       end
-      NinjaModel::Base.set_adapter
     end
   end
 end
