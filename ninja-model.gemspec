@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = %q{theprime@codingprime.com}
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
   s.summary     = %q{Makes custom backends more ActiveRecord-like}
-  s.summary     = %q{Makes custom backends more ActiveRecord-like, allowing for interoperability.}
+  s.description = %q{Makes custom backends more ActiveRecord-like, allowing for interoperability.}
 
   s.files         = Dir["{lib}/**/*", "[A-Z]*"] - ["Gemfile.lock"]
   s.require_paths = %w(lib)
