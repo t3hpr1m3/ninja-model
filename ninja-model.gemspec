@@ -9,12 +9,11 @@ Gem::Specification.new do |s|
   s.author      = %q{Josh Williams}
   s.email       = %q{theprime@codingprime.com}
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Makes custom backends more ActiveRecord-like}
 
   s.rubyforge_project = s.name
 
-  s.files         = Dir["{lib,spec}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
+  s.files         = Dir["{lib}/**/*", "[A-Z]*"] - ["Gemfile.lock"]
   s.require_paths = %w(lib)
 
   s.add_dependency 'rails', '3.0.3'
