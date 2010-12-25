@@ -9,7 +9,7 @@ module NinjaModel
             @proxy ||= begin
               self.class.proxy.instance(self)
             end
-            @proxy.update_attributes(self.attributes_for_active_record.delete_if { |k,v| k.eql?('id') })
+            @proxy.attributes = self.attributes_for_active_record.delete_if { |k,v| k.eql?('id') }
             @proxy
           end
         end

@@ -16,7 +16,7 @@ module NinjaModel
 
     class << self
 
-      delegate :find, :first, :last, :all, :to => :scoped
+      delegate :find, :first, :last, :all, :exists?, :to => :scoped
       delegate :where, :order, :limit, :to => :scoped
 
       def configuration_path

@@ -32,6 +32,11 @@ module NinjaModel
       end
     end
 
+    def exists?(id)
+      where(primary_key.to_sym => id).limit(1)
+      relation.first ? true : false
+    end
+
     protected
 
     def find_with_ids(*ids)
