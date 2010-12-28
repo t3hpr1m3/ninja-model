@@ -5,10 +5,11 @@ module NinjaModel
 
     attr_reader :attribute, :method, :value
 
-    def initialize(attribute, method)
+    def initialize(attribute, method, *args)
       @attribute = attribute
       @method = method
-      @valued = false
+      @valued = !args.blank?
+      @value = args.blank? ? nil : args.first
     end
 
     def value=(value)

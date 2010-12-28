@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.author      = %q{Josh Williams}
   s.email       = %q{theprime@codingprime.com}
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
-  s.summary     = %q{Write a gem summary}
-  s.description = %q{Write a gem description}
+  s.summary     = %q{TODO: Write a gem summary}
+  s.description = %q{TODO: Write a gem description}
 
   s.rubyforge_project = s.name
 

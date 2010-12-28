@@ -1,8 +1,10 @@
+require 'active_support/core_ext/object/blank'
+
 module NinjaModel
   class Relation
     include QueryMethods, FinderMethods, SpawnMethods
 
-    delegate :each, :all?, :include?, :to => :to_a
+    delegate :length, :each, :map, :collect, :all?, :include?, :to => :to_a
 
     attr_reader :klass, :loaded
 
@@ -27,7 +29,11 @@ module NinjaModel
     end
 
     def to_a
-      @klass.adapter.read(self)
+      @records ||= begin
+        records = @klass.adapter.read(self)
+        @loaded = true
+        records
+      end
     end
 
     def scoping
@@ -37,6 +43,18 @@ module NinjaModel
       ensure
         @klass.scoped_methods.pop
       end
+    end
+
+    def size
+      to_a.length
+    end
+
+    def blank?
+      empty?
+    end
+
+    def empty?
+      size.zero?
     end
 
     protected
@@ -51,7 +69,6 @@ module NinjaModel
       elsif @klass.scopes[method]
         merge(@klass.send(method, *args, &block))
       elsif @klass.respond_to?(method)
-        raise StandardError, "#{@klass.inspect} responds to #{method}"
         scoping { @klass.send(method, *args, &block) }
       else
         super

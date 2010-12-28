@@ -20,6 +20,17 @@ module NinjaModel
       @owner_class.primary_key = name.to_sym if @primary_key
     end
 
+    def convert(value)
+      case @type
+      when :string
+        value.to_s
+      when :integer
+        value.to_i
+      when :float
+        value.to_f
+      end
+    end
+
   end
 
   module Attributes
@@ -50,6 +61,13 @@ module NinjaModel
       self.class.model_attributes.inject({}.with_indifferent_access) do |attributes, (name, attribute)|
         attributes[name] = attribute.default unless attribute.name == self.class.primary_key
         attributes
+      end
+    end
+
+    def attributes_for_active_record
+      self.attributes.to_a.inject({}) do |result, attr|
+        result[attr.first.to_s] = attr.last
+        result
       end
     end
 
