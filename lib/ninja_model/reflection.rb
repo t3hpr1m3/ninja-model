@@ -21,6 +21,10 @@ module NinjaModel
       def reflections
         read_inheritable_attribute(:reflections) || write_inheritable_attribute(:reflections, {})
       end
+
+      def reflect_on_association(association)
+        reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+      end
     end
 
     class MacroReflection
@@ -65,6 +69,10 @@ module NinjaModel
 
       def primary_key_name
         @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+      end
+
+      def association_foreign_key
+        @association_foreign_key ||= @options[:association_foreign_key] || class_name.foreign_key
       end
 
       def collection?

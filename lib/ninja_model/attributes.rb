@@ -5,6 +5,7 @@ module NinjaModel
   class Attribute
     attr_reader :name, :type, :default, :primary_key
     alias :primary_key? :primary_key
+    alias :primary :primary_key
 
     def initialize(name, type, owner_class, options)
       @name = name.to_s
@@ -49,6 +50,23 @@ module NinjaModel
         undefine_attribute_methods if force
         super(model_attributes.keys)
       end
+
+
+      def attributes_hash
+        @attributes_hash ||= Hash[model_attributes.map { |attribute| [attribute.name, attribute] }]
+      end
+
+      alias :columns_hash :attributes_hash
+
+      def columns
+        model_attributes
+      end
+
+      def attribute_names
+        @attribute_names ||= model_attributes.map { |name, attribute| attribute.name }
+      end
+
+      alias :column_names :attribute_names
     end
 
     included do
@@ -81,6 +99,14 @@ module NinjaModel
 
     def read_attribute(name)
       @attributes[name.to_sym]
+    end
+
+    def [](attr_name)
+      read_attribute(attr_name)
+    end
+
+    def []=(attr_name, value)
+      write_attribute(attr_name, value)
     end
 
     protected

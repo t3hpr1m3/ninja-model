@@ -6,7 +6,7 @@ module NinjaModel
 
     config.ninja_model = NinjaModel::Configuration.create
 
-    config.generators.orm :ninja_model, :migration => false
+    #config.generators.orm :ninja_model, :migration => false
 
     initializer 'ninja_model.logger' do |app|
       NinjaModel::set_logger(Rails.logger)
