@@ -9,10 +9,12 @@ Gem::Specification.new do |s|
   s.author      = %q{Josh Williams}
   s.email       = %q{theprime@codingprime.com}
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
-  s.summary     = %q{Makes custom backends more ActiveRecord-like}
-  s.description = %q{Makes custom backends more ActiveRecord-like, allowing for interoperability.}
+  s.summary     = %q{TODO: Write a gem summary}
+  s.description = %q{TODO: Write a gem description}
 
-  s.files         = Dir["{lib}/**/*", "[A-Z]*"] - ["Gemfile.lock"]
+  s.rubyforge_project = s.name
+
+  s.files         = Dir["{lib,spec}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
   s.require_paths = %w(lib)
 
   s.add_dependency 'rails', '3.0.3'
@@ -22,7 +24,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rcov',      '~> 0.9.9'
   s.add_development_dependency 'cucumber',  '~> 0.9.4'
   s.add_development_dependency 'nokogiri',  '~> 1.4.4'
-
-  s.rubyforge_project = s.name
-  s.required_rubygems_version = '>= 1.3.4'
 end
