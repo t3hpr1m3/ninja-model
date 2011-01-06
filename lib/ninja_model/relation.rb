@@ -35,6 +35,7 @@ module NinjaModel
         records
       end
     end
+    alias :to_ary :to_a
 
     def scoping
       @klass.scoped_methods << self

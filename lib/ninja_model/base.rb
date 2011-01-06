@@ -9,6 +9,8 @@ module NinjaModel
     include Adapters
     include Associations
     include Reflection
+    include ActiveRecord::Aggregations
+    extend ActiveModel::Translation
     extend ActiveModel::Naming
 
     class_inheritable_accessor :default_scoping, :instance_writer => false
@@ -81,6 +83,9 @@ module NinjaModel
       @persisted = false
       @readonly = true
       @destroyed = false
+      result = yield self if block_given?
+      _run_initialize_callbacks
+      result
     end
 
     def instantiate(record)

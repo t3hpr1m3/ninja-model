@@ -40,15 +40,19 @@ module NinjaModel
       end
 
       def create(model)
+        false
       end
 
       def read(query)
+        nil
       end
 
       def update(model)
+        false
       end
 
       def delete(model)
+        false
       end
 
       def raw_connection

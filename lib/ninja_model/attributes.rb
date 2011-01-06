@@ -22,13 +22,13 @@ module NinjaModel
     end
 
     def convert(value)
-      case @type
-      when :string
-        value.to_s
-      when :integer
-        value.to_i
-      when :float
-        value.to_f
+      case type
+      when :string    then value
+      when :text      then value
+      when :integer   then value.to_i rescue value ? 1 : 0
+      when :float     then value.to_f
+      when :date      then ActiveRecord::ConnectionAdapters::Column.string_to_date(value)
+      else value
       end
     end
 
@@ -41,7 +41,7 @@ module NinjaModel
     module ClassMethods
       def attribute(name, data_type, options = {})
         new_attr = Attribute.new(name, data_type, self, options)
-        write_inheritable_hash(:model_attributes, {name => new_attr}.with_indifferent_access)
+        self.model_attributes.merge!( {name => new_attr} )
         new_attr.define_methods!
       end
 
@@ -71,7 +71,7 @@ module NinjaModel
 
     included do
       class_inheritable_hash :model_attributes
-      write_inheritable_attribute :model_attributes, {}.with_indifferent_access
+      self.model_attributes = {}.with_indifferent_access
       attribute_method_suffix('', '=')
     end
 
@@ -98,7 +98,11 @@ module NinjaModel
     end
 
     def read_attribute(name)
-      @attributes[name.to_sym]
+      if !(value = @attributes[name.to_sym]).nil?
+        self.class.model_attributes[name.to_sym].convert(@attributes[name.to_sym])
+      else
+        nil
+      end
     end
 
     def [](attr_name)

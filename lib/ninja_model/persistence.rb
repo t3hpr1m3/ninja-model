@@ -18,7 +18,7 @@ module NinjaModel
       class_inheritable_accessor :persistence_adapter
     end
 
-    def save
+    def save(*)
       run_callbacks :save do
         create_or_update
       end
@@ -34,9 +34,8 @@ module NinjaModel
     end
 
     def create
-      run_callbacks :create do
-        true
-      end
+      self.class.adapter.create(self)
+      @persisted = true
     end
 
     def update
@@ -58,13 +57,12 @@ module NinjaModel
     end
 
     def destroy
-      run_callbacks :destroy do
-        true
-      end
+      self.class.adapter.destroy(self)
+      @destroyed = true
     end
 
     def reload
-      true
+      self.class.adapter.reload(self)
     end
   end
 end

@@ -14,7 +14,7 @@ module NinjaModel
       def has_one(association_id, options = {})
         if ninja_model?(options[:class_name] || association_id)
           reflection = create_has_one_reflection(association_id, options)
-          #association_accessor_methods(reflection, HasOneAssociation)
+          association_accessor_methods(reflection, HasOneAssociation)
           #association_accessor_methods(reflection, HasOneAssociation)
           #association_constructor_method(:build, reflection, HasOneAssociation)
           #association_constructor_method(:create, reflection, HasOneAssociation)

@@ -1,7 +1,7 @@
 module NinjaModel
   class Predicate
 
-    PREDICATES = [:eq, :ne, :gt, :gte, :lt, :lte]
+    PREDICATES = [:eq, :ne, :gt, :gte, :lt, :lte, :in]
 
     attr_reader :attribute, :method, :value
 
@@ -35,6 +35,8 @@ module NinjaModel
         suspect < value
       when :lte
         suspect <= value
+      when :in
+        value.include?(suspect)
       end
     end
   end

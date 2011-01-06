@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe NinjaModel::QueryMethods do
   before(:each) do
-    @model = mock('model') do
-      stubs(:model_attributes).returns({:valid => {}}.with_indifferent_access)
-    end
+    @model = mock('model')
+    @attribute = NinjaModel::Attribute.new(:valid, :integer, @model, {})
+    @model.stubs(:model_attributes).returns({:valid => @attribute}.with_indifferent_access)
     @rel = NinjaModel::Relation.new(@model)
   end
 
