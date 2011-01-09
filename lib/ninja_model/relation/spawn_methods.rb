@@ -26,8 +26,8 @@ module NinjaModel
           end
           nuke
         }.reverse
-        merged_relation.predicates = merged_predicates
       end
+      merged_relation.predicates = merged_predicates
 
       merged_relation
 
