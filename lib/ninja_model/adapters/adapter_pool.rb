@@ -14,6 +14,7 @@ module NinjaModel
       end
 
       def instance
+        NinjaModel.logger.debug("instance called for #{current_instance_id}")
         @assigned_instances[current_instance_id] ||= checkout
       end
 
@@ -37,16 +38,19 @@ module NinjaModel
       private
 
       def clear_stale_cached_instances!
+        NinjaModel.logger.debug("clearing stale instances: #{@assigned_instances.keys}")
         keys = @assigned_instances.keys - Thread.list.find_all { |t|
           t.alive?
         }.map { |thread| thread.object_id }
         keys.each do |key|
+          NinjaModel.logger.debug("Checking in stale connection for #{key}")
           checkin @assigned_instances[key]
           @assigned_instances.delete(key)
         end
       end
 
       def checkout
+        NinjaModel.logger.debug("checking out a connection for #{current_instance_id}")
         @instance_mutex.synchronize do
           loop do
             instance = if @checked_out_instances.size < @instances.size
@@ -61,9 +65,13 @@ module NinjaModel
             if (@checked_out_instances.size < @instances.size)
               next
             else
+              NinjaModel.logger.debug("Connection pool full.  Clearing cached instances.")
               clear_stale_cached_instances!
               if @max_size == @checked_out_instances.size
-                raise ConnectionTimeoutError, "[ninja-model] *ERROR* Could not obtain an adapter instance within #{@timeout} seconds.  The max adapter pool size is currently #{@size}...consider increasing it."
+                NinjaModel.logger.warn("Connection pool full?")
+                NinjaModel.logger.warn("@checked_out_instances: #{@checked_out_instances.inspect}")
+                NinjaModel.logger.warn("@assigned_instances: #{@assigned_instances.inspect}")
+                raise ConnectionTimeoutError, "[ninja-model] *ERROR* Could not obtain an adapter instance within #{@timeout} seconds.  The max adapter pool size is currently #{@max_size}...consider increasing it."
               end
             end
           end

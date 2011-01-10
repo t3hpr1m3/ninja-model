@@ -60,6 +60,7 @@ module NinjaModel
 
     protected
 
+    alias :inspect! :inspect
     def inspect
       to_a.inspect
     end
