@@ -64,5 +64,10 @@ module NinjaModel
     def reload
       self.class.adapter.reload(self)
     end
+
+    def update_attributes(attributes)
+      self.attributes = attributes
+      save
+    end
   end
 end

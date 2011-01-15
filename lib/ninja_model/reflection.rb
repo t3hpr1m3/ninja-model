@@ -13,8 +13,10 @@ module NinjaModel
         reflection
       end
 
-      def ninja_model?(association)
-        klass = association.to_s.camelize.singularize.constantize
+      def ninja_model?(macro, association)
+        klass = association.to_s.camelize
+        klass = klass.singularize unless [:has_one, :belongs_to].include?(macro)
+        klass = klass.constantize
         defined?(klass) && klass.ancestors.include?(NinjaModel::Base)
       end
 
@@ -75,8 +77,19 @@ module NinjaModel
         @association_foreign_key ||= @options[:association_foreign_key] || class_name.foreign_key
       end
 
+      def check_validity!
+        check_validity_of_inverse!
+      end
+
+      def check_validity_of_inverse!
+      end
+
       def collection?
         @collection
+      end
+
+      def validate?
+        !options[:validate].nil? ? options[:validate] : (options[:autosave] == true || macro == :has_many)
       end
 
       private

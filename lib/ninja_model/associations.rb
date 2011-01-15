@@ -1,21 +1,75 @@
 require 'active_support/concern'
 require 'ninja_model/associations/active_record_proxy'
+require 'ninja_model/associations/ninja_model_proxy'
+
+module ActiveRecord
+  module Associations
+    module ClassMethods
+      alias :has_one_without_ninja_model :has_one
+      def has_one(association_id, options = {})
+        if ninja_model?(:has_one, options[:class_name] || association_id)
+          ninja_proxy.handle_association(:has_one, association_id, options)
+        else
+          has_one_without_ninja_model(association_id, options)
+        end
+      end
+
+      def ninja_proxy
+        read_inheritable_attribute(:ninja_proxy) || write_inheritable_attribute(:ninja_proxy, NinjaModel::Associations::NinjaModelProxy.new(self))
+      end
+
+      private
+
+      def ninja_model?(macro, association)
+        klass = association.to_s.camelize
+        klass = klass.singularize unless [:has_one, :belongs_to].include?(macro)
+        klass = klass.constantize
+        klass.ancestors.include?(NinjaModel::Base)
+      end
+    end
+
+    def method_missing(method, *args)
+      begin
+        super
+      rescue NoMethodError => ex
+        if self.class.read_inheritable_attribute(:ninja_proxy) && ninja_proxy.respond_to?(method)
+          ninja_proxy.send(method, *args)
+        else
+          raise ex
+        end
+      end
+    end
+  end
+
+  module Reflection
+    module ClassMethods
+      alias :reflect_on_association_without_ninja_model :reflect_on_association
+      def reflect_on_association(association)
+        if read_inheritable_attribute(:ninja_proxy) && ninja_proxy.proxy_klass.reflections.include?(association)
+          ninja_proxy.proxy_klass.reflect_on_association(association)
+        else
+          reflect_on_association_without_ninja_model(association)
+        end
+      end
+    end
+  end
+end
 
 module NinjaModel
   module Associations
     extend ActiveSupport::Concern
 
     autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
+    autoload :HasOneAssociation, 'ninja_model/associations/has_one_association'
     autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
     autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
 
 
     module ClassMethods
       def has_one(association_id, options = {})
-        if ninja_model?(options[:class_name] || association_id)
+        if ninja_model?(:has_one, options[:class_name] || association_id)
           reflection = create_has_one_reflection(association_id, options)
           association_accessor_methods(reflection, HasOneAssociation)
-          #association_accessor_methods(reflection, HasOneAssociation)
           #association_constructor_method(:build, reflection, HasOneAssociation)
           #association_constructor_method(:create, reflection, HasOneAssociation)
           #configure_dependency_for_has_one(reflection)
@@ -26,7 +80,7 @@ module NinjaModel
       end
 
       def belongs_to(association_id, options = {})
-        if ninja_model?(options[:class_name] || association_id)
+        if ninja_model?(:belongs_to, options[:class_name] || association_id)
           reflection = create_belongs_to_reflection(association_id, options)
           association_accessor_methods(reflection, BelongsToAssociation)
           #association_constructor_method(:build, reflection, BelongsToAssociation)
@@ -37,7 +91,7 @@ module NinjaModel
       end
 
       def has_many(association_id, options = {})
-        if ninja_model?(association_id)
+        if ninja_model?(:has_many, association_id)
           reflection = create_has_many_reflection(association_id, options)
           collection_accessor_methods(reflection, HasManyAssociation)
           #collection_accessor_methods(reflection, HasManyAssociation)
@@ -51,6 +105,10 @@ module NinjaModel
       end
 
       private
+
+      def create_has_one_reflection(association, options = {})
+        create_reflection(:has_one, association, options, self)
+      end
 
       def create_has_many_reflection(association, options = {})
         create_reflection(:has_many, association, options, self)

@@ -41,12 +41,12 @@ module NinjaModel
 
           case k
           when NinjaModel::Predicate
-            k.value = klass.model_attributes[k.attribute].convert(v)
+            k.value = klass.model_attributes_hash[k.attribute].convert(v)
             k
           when Symbol, String
-            raise ArgumentError, "#{klass} doesn't have an attribute #{k}." unless klass.model_attributes.key?(k)
+            raise ArgumentError, "#{klass} doesn't have an attribute #{k}." unless klass.attribute_method?(k)
             p = NinjaModel::Predicate.new(k.to_sym, :eq)
-            p.value = klass.model_attributes[p.attribute].convert(v)
+            p.value = klass.model_attributes_hash[p.attribute].convert(v)
             p
           else
             raise ArgumentError, "#{k} isn't a predicate or a symbol."

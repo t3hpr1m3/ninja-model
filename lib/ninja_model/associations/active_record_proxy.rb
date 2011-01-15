@@ -9,7 +9,7 @@ module NinjaModel
             @proxy ||= begin
               self.class.proxy.instance(self)
             end
-            @proxy.attributes = self.attributes_for_active_record.delete_if { |k,v| k.eql?('id') }
+            @proxy.attributes = self.attributes.delete_if { |k,v| k.eql?('id') }
             @proxy
           end
         end
@@ -23,14 +23,14 @@ module NinjaModel
           end
         end
 
-        @klass.model_attributes.each_pair do |k,v|
-          @proxy_klass.send :column, k, v.type, v.default
+        @klass.model_attributes.each do |attr|
+          @proxy_klass.send :column, attr.name, attr.type, attr.default
         end
       end
 
       def instance(obj)
         proxy = @proxy_klass.new
-        proxy.send :init_with, {'attributes' => obj.attributes_for_active_record}
+        proxy.send :init_with, {'attributes' => obj.attributes}
         proxy
       end
 

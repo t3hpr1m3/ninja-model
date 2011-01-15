@@ -7,12 +7,10 @@ module NinjaModel
     alias :primary_key? :primary_key
     alias :primary :primary_key
 
-    def initialize(name, type, owner_class, options)
-      @name = name.to_s
-      @type = type
+    def initialize(name, type, default, owner_class, options)
+      @name, @type, @default = name.to_s, type, default
       @owner_class = owner_class
       @options = options
-      @default = options[:default] if options.key?(:default)
       @primary_key = options.key?(:primary_key) && options[:primary_key]
     end
 
@@ -31,7 +29,6 @@ module NinjaModel
       else value
       end
     end
-
   end
 
   module Attributes
@@ -39,67 +36,64 @@ module NinjaModel
     include ActiveModel::AttributeMethods
 
     module ClassMethods
-      def attribute(name, data_type, options = {})
-        new_attr = Attribute.new(name, data_type, self, options)
-        self.model_attributes.merge!( {name => new_attr} )
+      def attribute(name, data_type, *args)
+        name = name.to_s
+        opts = args.extract_options!
+        default = args.first unless args.blank?
+        new_attr = Attribute.new(name, data_type, default, self, opts)
+        self.model_attributes << new_attr
         new_attr.define_methods!
       end
 
       def define_attribute_methods(force = false)
-        return unless model_attributes
+        return unless self.model_attributes
         undefine_attribute_methods if force
-        super(model_attributes.keys)
+        super(self.model_attributes.map { |attr| attr.name })
       end
-
-
-      def attributes_hash
-        @attributes_hash ||= Hash[model_attributes.map { |attribute| [attribute.name, attribute] }]
-      end
-
-      alias :columns_hash :attributes_hash
 
       def columns
         model_attributes
       end
 
+      def model_attributes_hash
+        @attributes_hash ||= HashWithIndifferentAccess[model_attributes.map { |attribute| [attribute.name, attribute] }]
+      end
+
+      alias :columns_hash :model_attributes_hash
+
       def attribute_names
-        @attribute_names ||= model_attributes.map { |name, attribute| attribute.name }
+        @attribute_names ||= model_attributes.map { |attribute| attribute.name }
       end
 
       alias :column_names :attribute_names
     end
 
     included do
-      class_inheritable_hash :model_attributes
-      self.model_attributes = {}.with_indifferent_access
+      class_inheritable_accessor :model_attributes
+      self.model_attributes = []
       attribute_method_suffix('', '=')
     end
 
     def attributes_from_model_attributes
-      self.class.model_attributes.inject({}.with_indifferent_access) do |attributes, (name, attribute)|
-        attributes[name] = attribute.default unless attribute.name == self.class.primary_key
-        attributes
-      end
-    end
-
-    def attributes_for_active_record
-      self.attributes.to_a.inject({}) do |result, attr|
-        result[attr.first.to_s] = attr.last
+      self.class.model_attributes.inject({}) do |result, attr|
+        result[attr.name] = attr.default unless attr.name == self.class.primary_key
         result
       end
     end
 
     def write_attribute(name, value)
-      if a = self.class.model_attributes.with_indifferent_access[name]
-        @attributes[name.to_s] = value
+      name = name.to_s
+      if a = self.class.model_attributes_hash[name]
+        @attributes[name] = value
       else
         raise NoMethodError, "Unknown attribute #{name.inspect}"
       end
     end
 
     def read_attribute(name)
-      if !(value = @attributes[name.to_sym]).nil?
-        self.class.model_attributes[name.to_sym].convert(@attributes[name.to_sym])
+      name = name.to_s
+      if !(value = @attributes[name]).nil?
+        self.class.model_attributes_hash[name].convert(@attributes[name])
       else
         nil
       end
@@ -113,14 +107,6 @@ module NinjaModel
       write_attribute(attr_name, value)
     end
 
-    protected
-
-    def attribute_method?(name)
-      model_attributes.with_indifferent_access.key?(name)
-    end
-
-    private
-
     def attributes=(new_attributes)
       return unless new_attributes.is_a?(Hash)
       attributes = new_attributes.stringify_keys
@@ -130,12 +116,19 @@ module NinjaModel
       end
     end
 
+    def attribute_method?(name)
+      name = name.to_s
+      self.class.model_attributes_hash.key?(name)
+    end
+
+    private
+
     def attribute(name)
-      read_attribute(name.to_sym)
+      read_attribute(name)
     end
 
     def attribute=(name, value)
-      write_attribute(name.to_sym, value)
+      write_attribute(name, value)
     end
   end
 end

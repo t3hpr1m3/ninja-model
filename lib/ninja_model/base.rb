@@ -75,10 +75,16 @@ module NinjaModel
       end
     end
 
-    attr_reader :attributes
+    def attributes
+      attrs = {}
+      self.class.attribute_names.each { |name|
+        attrs[name] = read_attribute(name)
+      }
+      attrs
+    end
 
-    def initialize(attributes={})
-      @attributes = attributes_from_model_attributes.with_indifferent_access
+    def initialize(attributes = nil)
+      @attributes = attributes_from_model_attributes
       self.attributes = attributes unless attributes.nil?
       @persisted = false
       @readonly = true
@@ -89,7 +95,7 @@ module NinjaModel
     end
 
     def instantiate(record)
-      @attributes = record
+      @attributes = record.stringify_keys
       @readonly = @destroyed = false
       @persisted = true
       self
