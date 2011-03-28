@@ -51,7 +51,7 @@ module NinjaModel
         false
       end
 
-      def delete(model)
+      def destroy(model)
         false
       end
 
