@@ -30,12 +30,13 @@ module NinjaModel
       else
         update
       end
-      true
     end
 
     def create
-      self.class.adapter.create(self)
-      @persisted = true
+      if self.class.adapter.create(self)
+        @persisted = true
+      end
+      @persisted
     end
 
     def update
@@ -57,8 +58,10 @@ module NinjaModel
     end
 
     def destroy
-      self.class.adapter.destroy(self)
-      @destroyed = true
+      if self.class.adapter.destroy(self)
+        @destroyed = true
+      end
+      @destroyed
     end
 
     def reload
