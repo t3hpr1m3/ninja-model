@@ -6,7 +6,9 @@ module NinjaModel
     include ActiveModel::Validations
 
     def save(options={})
-      perform_validations(options) ? super : false
+      run_callbacks :validation do
+        perform_validations(options) ? super : false
+      end
     end
 
     def valid?(context = nil)

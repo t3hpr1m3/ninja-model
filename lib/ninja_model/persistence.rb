@@ -33,16 +33,16 @@ module NinjaModel
     end
 
     def create
-      if self.class.adapter.create(self)
-        @persisted = true
+      run_callbacks :create do
+        if self.class.adapter.create(self)
+          @persisted = true
+        end
+        @persisted
       end
-      @persisted
     end
 
     def update
-      run_callbacks :update do
-        true
-      end
+      self.class.adapter.update(self)
     end
 
     def new_record?
