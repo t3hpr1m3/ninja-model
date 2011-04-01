@@ -8,7 +8,7 @@ module NinjaModel
     included do
       extend ActiveModel::Callbacks
       define_model_callbacks :initialize, :find, :touch, :only => :after
-      define_model_callbacks :save, :create, :update, :destroy
+      define_model_callbacks :save, :create, :update, :destroy, :validation
     end
   end
 end
