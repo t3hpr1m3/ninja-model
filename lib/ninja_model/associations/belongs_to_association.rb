@@ -20,7 +20,11 @@ module NinjaModel
       private
 
       def find_target
-        @reflection.klass.scoped.where(@reflection.association_foreign_key => @owner.send(@reflection.primary_key_name)).first
+        if @reflection.options[:primary_key]
+          @reflection.klass.scoped.where( @reflection.options[:primary_key] => @owner.send(@reflection.primary_key_name)).first
+        else
+          @reflection.klass.scoped.where( :id => @owner.send(@reflection.primary_key_name)).first
+        end
       end
 
       def record_id(record)
