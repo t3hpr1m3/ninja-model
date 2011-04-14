@@ -26,6 +26,7 @@ module NinjaModel
       when :integer   then value.to_i rescue value ? 1 : 0
       when :float     then value.to_f
       when :date      then ActiveRecord::ConnectionAdapters::Column.string_to_date(value)
+      when :datetime  then ActiveRecord::ConnectionAdapters::Column.string_to_time(value)
       else value
       end
     end
