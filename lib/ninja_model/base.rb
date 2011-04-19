@@ -12,6 +12,7 @@ module NinjaModel
     include ActiveRecord::Aggregations
     extend ActiveModel::Translation
     extend ActiveModel::Naming
+    include ActiveModel::Dirty
 
     class_inheritable_accessor :default_scoping, :instance_writer => false
     self.default_scoping = []

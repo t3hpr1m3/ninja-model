@@ -129,7 +129,10 @@ module NinjaModel
     end
 
     def attribute=(name, value)
-      write_attribute(name, value)
+      unless read_attribute(name).eql?(value)
+        attribute_will_change!(name)
+        write_attribute(name, value)
+      end
     end
   end
 end

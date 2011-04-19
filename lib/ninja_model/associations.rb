@@ -1,3 +1,4 @@
+require 'active_record/associations'
 require 'active_support/concern'
 require 'ninja_model/associations/active_record_proxy'
 require 'ninja_model/associations/ninja_model_proxy'

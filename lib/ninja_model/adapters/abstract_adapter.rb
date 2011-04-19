@@ -1,6 +1,7 @@
 module NinjaModel
   module Adapters
     class AbstractAdapter
+      attr_reader :config
       class << self
         def instance
           @instance ||= new

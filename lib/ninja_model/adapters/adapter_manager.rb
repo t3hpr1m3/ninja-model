@@ -31,7 +31,7 @@ module NinjaModel
 
       def retrieve_adapter(klass)
         pool = retrieve_adapter_pool(klass)
-        (pool && pool.instance) or raise StandardError
+        (pool && pool.instance) or raise StandardError, "Pool is empty or instance is null"
       end
 
       def remove_adapter(klass)
