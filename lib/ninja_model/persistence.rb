@@ -38,7 +38,9 @@ module NinjaModel
     end
 
     def update
-      self.class.adapter.update(self)
+      run_callbacks :update do
+        self.class.adapter.update(self)
+      end
     end
 
     def new_record?
@@ -54,10 +56,12 @@ module NinjaModel
     end
 
     def destroy
-      if self.class.adapter.destroy(self)
-        @destroyed = true
+      run_callbacks :destroy do
+        if self.class.adapter.destroy(self)
+          @destroyed = true
+        end
+        @destroyed
       end
-      @destroyed
     end
 
     def reload
