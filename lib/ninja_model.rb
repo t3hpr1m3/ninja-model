@@ -4,26 +4,11 @@ require 'active_support/core_ext/hash/indifferent_access'
 module NinjaModel
   extend ActiveSupport::Autoload
 
-  autoload :Base
-  autoload :Adapters
-  autoload :Associations
-  autoload :Attributes
-  autoload :Callbacks
-  autoload :Configuration
-  autoload :Identity
-  autoload :Persistence
-  autoload :Predicate
-  autoload :Reflection
-  autoload :Relation
-  autoload :Scoping
-  autoload :Validation
-
   autoload_under 'relation' do
     autoload :QueryMethods
     autoload :FinderMethods
     autoload :SpawnMethods
   end
-
 
   class << self
     attr_accessor :logger
@@ -34,5 +19,19 @@ module NinjaModel
   end
 end
 
+require 'ninja_model/base'
+#require 'ninja_model/configuration'
+#require 'ninja_model/attributes'
+#require 'ninja_model/errors'
+#require 'ninja_model/associations'
+#require 'ninja_model/rails_ext/active_record'
+#require 'ninja_model/adapters'
+#require 'ninja_model/callbacks'
+#require 'ninja_model/identity'
+#require 'ninja_model/persistence'
+#require 'ninja_model/predicate'
+#require 'ninja_model/reflection'
+#require 'ninja_model/relation'
+#require 'ninja_model/scoping'
+#require 'ninja_model/validation'
 require 'ninja_model/railtie'
-require 'ninja_model/errors'
