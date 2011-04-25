@@ -72,7 +72,7 @@ module NinjaModel
     included do
       class_inheritable_accessor :model_attributes
       self.model_attributes = []
-      attribute_method_suffix('', '=')
+      attribute_method_suffix('', '=', '_before_type_cast')
     end
 
     def attributes_from_model_attributes
@@ -133,6 +133,10 @@ module NinjaModel
         attribute_will_change!(name)
         write_attribute(name, value)
       end
+    end
+
+    def attribute_before_type_cast(name)
+      @attributes[name]
     end
   end
 end

@@ -19,12 +19,10 @@ module NinjaModel
     end
 
     def save(*)
-      if changed?
-        run_callbacks :save do
-          result = new_record? ? create : update
-          changed_attributes.clear if result
-          result
-        end
+      run_callbacks :save do
+        result = new_record? ? create : update
+        changed_attributes.clear if result
+        result
       end
     end
 

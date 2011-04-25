@@ -114,6 +114,8 @@ module NinjaModel
       @attributes = record.stringify_keys
       @readonly = @destroyed = false
       @persisted = true
+      _run_find_callbacks
+      _run_initialize_callbacks
       self
     end
   end
