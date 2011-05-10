@@ -3,6 +3,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 
 module NinjaModel
   extend ActiveSupport::Autoload
+  class NinjaModelError < StandardError; end
 
   autoload_under 'relation' do
     autoload :QueryMethods
@@ -17,8 +18,13 @@ module NinjaModel
       ::NinjaModel.logger = logger
     end
   end
+
+  class Base
+  end
 end
 
+require 'ninja_model/attribute'
+require 'ninja_model/attribute_methods'
 require 'ninja_model/base'
 #require 'ninja_model/configuration'
 #require 'ninja_model/attributes'

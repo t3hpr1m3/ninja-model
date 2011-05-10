@@ -2,37 +2,7 @@ require 'active_support'
 require 'active_model/attribute_methods'
 
 module NinjaModel
-  class Attribute
-    attr_reader :name, :type, :default, :primary_key
-    alias :primary_key? :primary_key
-    alias :primary :primary_key
-
-    def initialize(name, type, default, owner_class, options)
-      @name, @type, @default = name.to_s, type, default
-      @owner_class = owner_class
-      @options = options
-      @primary_key = options.key?(:primary_key) && options[:primary_key]
-    end
-
-    def define_methods!
-      @owner_class.define_attribute_methods(true)
-      @owner_class.primary_key = name.to_sym if @primary_key
-    end
-
-    def convert(value)
-      case type
-      when :string    then value
-      when :text      then value
-      when :integer   then value.to_i rescue value ? 1 : 0
-      when :float     then value.to_f
-      when :date      then ActiveRecord::ConnectionAdapters::Column.string_to_date(value)
-      when :datetime  then ActiveRecord::ConnectionAdapters::Column.string_to_time(value)
-      else value
-      end
-    end
-  end
-
-  module Attributes
+  module AttributeMethods
     extend ActiveSupport::Concern
     include ActiveModel::AttributeMethods
 
@@ -43,7 +13,7 @@ module NinjaModel
         default = args.first unless args.blank?
         new_attr = Attribute.new(name, data_type, default, self, opts)
         self.model_attributes << new_attr
-        new_attr.define_methods!
+        define_attribute_methods(true)
       end
 
       def define_attribute_methods(force = false)
