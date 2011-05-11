@@ -1,84 +1,95 @@
 require 'spec_helper'
 
-#describe NinjaModel::Attributes do
-#  before(:each) do
-#    @klass = Class.new do
-#      def initialize
-#        @attributes = {}.with_indifferent_access
-#      end
-#    end
-#    @klass.send :include, NinjaModel::Attributes
-#    @klass.send :attr_reader, :attributes
-#  end
-#
-#  describe 'adding an attribute' do
-#    before(:each) do
-#      @klass.attribute :var, :string
-#      @obj = @klass.new
-#    end
-#
-#    it 'should add a new attribute' do
-#      @klass.model_attributes[:var].type.should eql(:string)
-#    end
-#
-#    it 'should add a read method' do
-#      lambda { @obj.send :var }.should_not raise_error(NoMethodError)
-#    end
-#
-#    it 'should add a write method' do
-#      lambda { @obj.send :var= }.should_not raise_error(NoMethodError)
-#    end
-#  end
-#
-#  describe 'with an instance' do
-#    describe 'writing an attribute value' do
-#      before(:each) do
-#        @klass.attribute :valid, :string
-#        @obj = @klass.new
-#      end
-#
-#      it 'should raise an error when writing an invalid attribute' do
-#        lambda { @obj.write_attribute(:invalid, 'test') }.should raise_error(NoMethodError)
-#      end
-#
-#      it 'should properly update a valid attribute' do
-#        @obj.write_attribute(:valid, 'test')
-#        @obj.attributes['valid'].should eql('test')
-#      end
-#    end
-#
-#    describe 'assigning from a hash' do
-#      before(:each) do
-#        @klass.attribute :valid, :string
-#        @obj = @klass.new
-#      end
-#
-#      it 'should update instance attributes' do
-#        attrs = {:valid => 'valid value'}
-#        @obj.send :attributes=, attrs
-#        @obj.valid.should eql('valid value')
-#      end
-#    end
-#
-#    describe 'checking existence of an attribute' do
-#      before(:each) do
-#        @klass.attribute :valid, :string
-#        @obj = @klass.new
-#      end
-#      it { (@obj.send :attribute_method?, :valid).should be_true }
-#      it { (@obj.send :attribute_method?, 'valid').should be_true }
-#      it { (@obj.send :attribute_method?, :invalid).should be_false }
-#    end
-#
-#    describe 'assigining default attributes from model' do
-#      before(:each) do
-#        @klass.attribute :valid, :string, {:default => 'foobar'}
-#        @klass.send :class_inheritable_accessor, :primary_key
-#        @obj = @klass.new
-#        @attrs = @obj.attributes_from_model_attributes
-#      end
-#      it { @attrs.should have_key('valid') }
-#      it { @attrs[:valid].should eql('foobar') }
-#    end
-#  end
-#end
+describe NinjaModel::AttributeMethods do
+  class AttributeModel < NinjaModel::Base
+    attribute :test, :string
+  end
+  subject { AttributeModel.new }
+  specify { subject.attribute_method?(:test).should be_true }
+  specify { subject.attribute_method?(:invalid).should be_false }
+
+  it 'should return a list of valid attribute names' do
+    AttributeModel.attribute_names.should eql(['test'])
+  end
+
+  it 'should return a valid column list' do
+    AttributeModel.columns.length.should eql(1)
+  end
+
+  it 'should allow updating by hash' do
+    subject.attributes = {:test => 'hashvalue'}
+    subject.test.should eql('hashvalue')
+  end
+end
+
+describe NinjaModel::AttributeMethods, 'reading an attribute' do
+  class ReaderModel < NinjaModel::Base
+    attribute :test, :string
+  end
+  subject { ReaderModel.new }
+  it { should respond_to(:test) }
+  it 'should call "read_attribute"' do
+    subject.expects(:read_attribute).with('test')
+    subject.test
+  end
+
+  context 'by hash key' do
+    it 'should call "read_attribute"' do
+      subject.expects(:read_attribute).with(:test)
+      subject[:test]
+    end
+    it 'should return the correct value' do
+      subject.test = 'hashcorrect'
+      subject[:test].should eql('hashcorrect')
+    end
+    it 'should accept a string hash key' do
+      subject.test = 'stringkey'
+      subject['test'].should eql('stringkey')
+    end
+  end
+
+  context 'before_type_cast' do
+    it 'should not convert the value' do
+      subject.test = Date.new(2001,1,1)
+      subject.test_before_type_cast.should eql(Date.new(2001,1,1))
+    end
+  end
+end
+
+describe NinjaModel::AttributeMethods, 'writing an attribute' do
+  class WriterModel < NinjaModel::Base
+    attribute :test, :string
+  end
+  subject { WriterModel.new }
+  it 'should call "write_attribute"' do
+    subject.expects(:write_attribute).with('test', 'newvalue')
+    subject.test = 'newvalue'
+  end
+  it 'should update the value' do
+    subject.test = 'newvalue'
+    subject.test.should eql('newvalue')
+  end
+  it 'should be dirty' do
+    subject.test = 'newvalue'
+    subject.changed?.should be_true
+    subject.test_changed?.should be_true
+  end
+  it 'should raise an exception for an invalid attribute name' do
+    lambda { subject.write_attribute(:invalid, 'foo') }.should raise_error(NoMethodError)
+  end
+
+  context 'by hash key' do
+    it 'should call "write_attribute"' do
+      subject.expects(:write_attribute).with(:test, 'newvalue')
+      subject[:test] = 'newvalue'
+    end
+    it 'should update the value' do
+      subject[:test] = 'newvalue'
+      subject.test.should eql('newvalue')
+    end
+    it 'should accept a string hash key' do
+      subject['test'] = 'stringkey'
+      subject.test.should eql('stringkey')
+    end
+  end
+end

@@ -1,17 +1,21 @@
-require 'active_support'
-require 'active_model/attribute_methods'
-
 module NinjaModel
-  module AttributeMethods
-    extend ActiveSupport::Concern
+  class Base
     include ActiveModel::AttributeMethods
+    include ActiveModel::Dirty
 
-    module ClassMethods
+    class_inheritable_accessor :model_attributes
+    self.model_attributes = []
+    attribute_method_suffix('', '=', '_before_type_cast')
+
+    class << self
+
       def attribute(name, data_type, *args)
         name = name.to_s
         opts = args.extract_options!
+        primary = opts.delete(:primary_key)
+        self.primary_key = name if primary.eql?(true)
         default = args.first unless args.blank?
-        new_attr = Attribute.new(name, data_type, default, self, opts)
+        new_attr = Attribute.new(name, data_type, opts)
         self.model_attributes << new_attr
         define_attribute_methods(true)
       end
@@ -38,12 +42,9 @@ module NinjaModel
 
       alias :column_names :attribute_names
     end
+  end
 
-    included do
-      class_inheritable_accessor :model_attributes
-      self.model_attributes = []
-      attribute_method_suffix('', '=', '_before_type_cast')
-    end
+  module AttributeMethods
 
     def attributes_from_model_attributes
       self.class.model_attributes.inject({}) do |result, attr|
