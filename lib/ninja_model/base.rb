@@ -7,25 +7,26 @@ require 'ninja_model/persistence'
 require 'ninja_model/predicate'
 require 'ninja_model/reflection'
 require 'ninja_model/relation'
-require 'ninja_model/scoping'
 require 'ninja_model/validation'
 require 'ninja_model/attribute'
-require 'ninja_model/core_ext/symbol'
+require 'active_record/named_scope'
+require 'active_record/aggregations'
 
 module NinjaModel
   class Base
     include AttributeMethods
     include Identity
     include Persistence
-    include Scoping
     include Validation
     include Adapters
     include Associations
     include Reflection
-    include ActiveRecord::Aggregations
     extend ActiveModel::Translation
     extend ActiveModel::Naming
+    include ActiveModel::Observing
     include ActiveModel::Dirty
+    include ActiveRecord::Aggregations
+    include ActiveRecord::NamedScope
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
 

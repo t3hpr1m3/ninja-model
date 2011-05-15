@@ -36,8 +36,16 @@ describe NinjaModel::Adapters do
       @klass = Class.new(NinjaModel::Base)
     }
     subject { @klass }
-    it 'should return a DummyAdapter pool when nil is passed' do
-      subject.set_adapter.spec.name.should eql(:dummy)
+    context 'when nil is passed' do
+      it 'should return a DummyAdapter if Rails is available' do
+        @rails = Object.const_set('Rails', Class.new(Object))
+        @rails.stubs(:env).returns('development')
+        subject.set_adapter.spec.name.should eql(:dummy)
+        Object.send(:remove_const, :Rails)
+      end
+      it 'should raise AdapterNotSpecified is Rails is not available' do
+        lambda { subject.set_adapter }.should raise_error(NinjaModel::Adapters::AdapterNotSpecified)
+      end
     end
     it 'should return a DummyAdapter pool when "development" is passed' do
       subject.set_adapter('development').spec.name.should eql(:dummy)

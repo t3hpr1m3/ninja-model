@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
   s.author      = %q{Josh Williams}
   s.email       = %q{theprime@codingprime.com}
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
-  s.summary     = %q{Write a gem summary}
-  s.description = %q{Write a gem description}
+  s.summary     = %q{Pseudo-ORM for Ruby}
+  s.description = %q{Pseudo-ORM for Ruby/Rails with an ActiveRecord-like interface}
 
   s.rubyforge_project = s.name
 
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'rails', '3.0.3'
+  s.add_dependency 'activerecord', '~> 3.0.3'
 
   s.add_development_dependency 'rspec',     '~> 2.2.0'
   s.add_development_dependency 'mocha',     '~> 0.9.8'

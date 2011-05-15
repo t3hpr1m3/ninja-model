@@ -1,16 +1,14 @@
+require 'ninja_model/adapters/abstract_adapter'
+require 'ninja_model/adapters/adapter_manager'
+require 'ninja_model/adapters/adapter_pool'
+require 'ninja_model/adapters/adapter_specification'
+
 module NinjaModel
 
   module Adapters
-    extend ActiveSupport::Concern
-    extend ActiveSupport::Autoload
     class AdapterNotSpecified < StandardError; end
     class InvalidAdapter < StandardError; end
     class InvalidSpecification < StandardError; end
-
-    autoload :AdapterSpecification
-    autoload :AdapterManager
-    autoload :AdapterPool
-    autoload :AbstractAdapter
   end
 
   class Base
@@ -41,7 +39,6 @@ module NinjaModel
           end
         else
           spec = spec.symbolize_keys
-          puts "spec: #{spec.inspect}"
           raise Adapters::AdapterNotSpecified, "configuration does not specify adapter" unless spec.key?(:adapter)
           adapter_name = spec[:adapter]
           raise Adapters::InvalidAdapter, "configuration does not specify adapter" unless Adapters::AdapterManager.registered?(adapter_name)

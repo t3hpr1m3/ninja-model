@@ -1,3 +1,7 @@
+require 'ninja_model/relation/query_methods'
+require 'ninja_model/relation/finder_methods'
+require 'ninja_model/relation/spawn_methods'
+
 module NinjaModel
   class Relation
     include QueryMethods, FinderMethods, SpawnMethods

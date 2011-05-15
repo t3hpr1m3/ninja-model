@@ -98,8 +98,6 @@ module NinjaModel
       end
 
       def new_instance
-        puts "registered: #{AdapterManager.registered.inspect}"
-        puts "spec: #{spec}"
         AdapterManager.registered[spec.name.to_sym].new(spec.config)
       end
 

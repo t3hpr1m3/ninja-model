@@ -1,15 +1,8 @@
-require 'rails/all'
-require 'active_support/all'
+require 'active_model'
+require 'active_support/core_ext'
 
 module NinjaModel
-  extend ActiveSupport::Autoload
   class NinjaModelError < StandardError; end
-
-  autoload_under 'relation' do
-    autoload :QueryMethods
-    autoload :FinderMethods
-    autoload :SpawnMethods
-  end
 
   class << self
     attr_accessor :logger
@@ -35,4 +28,7 @@ module NinjaModel
 end
 
 require 'ninja_model/base'
-require 'ninja_model/railtie'
+require 'ninja_model/core_ext/symbol'
+if defined?(Rails)
+  require 'ninja_model/railtie'
+end
