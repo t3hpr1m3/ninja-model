@@ -1,4 +1,5 @@
 module NinjaModel
+  class ConnectionTimeoutError < NinjaModelError; end
   module Adapters
     class AdapterPool
       attr_reader :spec, :instances
@@ -11,6 +12,10 @@ module NinjaModel
         @instance_queue = @instance_mutex.new_cond
         @max_size = 5
         @timeout = 3
+      end
+
+      def connected?
+        !@instances.empty?
       end
 
       def instance
@@ -31,8 +36,15 @@ module NinjaModel
         release_instance(instance_id) if fresh_instance
       end
 
-      def connected?
-        !@instances.empty?
+      def shutdown!
+        @assigned_instances.each do |name,conn|
+          checkin conn
+        end
+        @assigned_instances = {}
+        @instances.each do |inst|
+          inst.disconnect!
+        end
+        @instances = []
       end
 
       private
@@ -86,7 +98,9 @@ module NinjaModel
       end
 
       def new_instance
-        NinjaModel::Base.send(spec.adapter_method, spec.config)
+        puts "registered: #{AdapterManager.registered.inspect}"
+        puts "spec: #{spec}"
+        AdapterManager.registered[spec.name.to_sym].new(spec.config)
       end
 
       def current_instance_id
@@ -108,20 +122,6 @@ module NinjaModel
         inst.verify!
         @checked_out_instances << inst
         inst
-      end
-    end
-
-    class AdapterManagement
-      def initialize(app)
-        @app = app
-      end
-
-      def call(env)
-        @app.call(env)
-      ensure
-        unless env.key?('rask.test')
-          NinjaModel::Base.clear_active_instances!
-        end
       end
     end
   end

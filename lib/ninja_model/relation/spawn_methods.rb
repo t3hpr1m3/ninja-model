@@ -29,7 +29,7 @@ module NinjaModel
       end
       merged_relation.predicates = merged_predicates
 
-      Relation::SINGLE_VALUE_ATTRS.reject { |m| m == :lock }.each do |method|
+      Relation::SINGLE_VALUE_ATTRS.each do |method|
         value = r.send(:"#{method}_value")
         merged_relation.send(:"#{method}_value=", value) unless value.nil?
       end

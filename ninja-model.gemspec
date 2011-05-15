@@ -14,15 +14,15 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = s.name
 
-  s.files         = Dir["{lib,spec}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
-  s.require_paths = %w(lib)
+  s.files         = `git ls-files`.split("\n") - ["Gemfile.lock"]
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.require_paths = ["lib"]
 
   s.add_dependency 'rails', '3.0.3'
 
   s.add_development_dependency 'rspec',     '~> 2.2.0'
   s.add_development_dependency 'mocha',     '~> 0.9.8'
   s.add_development_dependency 'rcov',      '~> 0.9.9'
-  s.add_development_dependency 'cucumber',  '~> 0.9.4'
   s.add_development_dependency 'nokogiri',  '~> 1.4.4'
   s.add_development_dependency 'autotest',  '~> 4.4.6'
 end

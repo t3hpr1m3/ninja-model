@@ -1,7 +1,4 @@
-require 'ninja_model/rails_ext/active_record'
-require 'ninja_model/configuration'
 require 'ninja_model/attribute_methods'
-require 'ninja_model/errors'
 require 'ninja_model/associations'
 require 'ninja_model/adapters'
 require 'ninja_model/callbacks'
@@ -13,11 +10,11 @@ require 'ninja_model/relation'
 require 'ninja_model/scoping'
 require 'ninja_model/validation'
 require 'ninja_model/attribute'
+require 'ninja_model/core_ext/symbol'
 
 module NinjaModel
   class Base
     include AttributeMethods
-    include Callbacks
     include Identity
     include Persistence
     include Scoping
@@ -30,6 +27,8 @@ module NinjaModel
     extend ActiveModel::Naming
     include ActiveModel::Dirty
 
+    define_model_callbacks :initialize, :find, :touch, :only => :after
+
     class_inheritable_accessor :default_scoping, :instance_writer => false
     self.default_scoping = []
 
@@ -37,20 +36,6 @@ module NinjaModel
 
       delegate :find, :first, :last, :all, :exists?, :to => :scoped
       delegate :where, :order, :limit, :to => :scoped
-
-      def configuration_path
-        @config_path ||= File.join(Rails.root, "config/ninja_model.yml")
-      end
-
-      def configuration_path=(new_path)
-        @config_path = new_path
-      end
-
-      def configuration
-        require 'erb'
-        require 'yaml'
-        @configuration ||= YAML::load(ERB.new(IO.read(configuration_path)).result).with_indifferent_access
-      end
 
       def relation
         @relation ||= Relation.new(self)
@@ -121,5 +106,3 @@ module NinjaModel
     end
   end
 end
-
-require 'ninja_model/core_ext/symbol'

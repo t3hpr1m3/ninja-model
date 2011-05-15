@@ -1,15 +1,11 @@
 module NinjaModel
+  class RecordNotFound < NinjaModelError; end
   module FinderMethods
     def first(*args)
       if args.any?
+        apply_finder_options(args.first).limit(1).to_a.first
       else
         find_first
-      end
-    end
-
-    def last(*args)
-      if args.any?
-      else
       end
     end
 
@@ -24,7 +20,7 @@ module NinjaModel
         apply_finder_options(options).find(*args)
       else
         case args.first
-        when :first, :last, :all
+        when :first, :all
           send(args.first)
         else
           find_with_ids(*args)
@@ -53,7 +49,7 @@ module NinjaModel
         result = find_one(ids.first)
         expects_array ? [result] : result
       else
-        find_some(ids)
+        raise NotImplementedError, "Finding by multiple id's is not implemented"
       end
     end
 

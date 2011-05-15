@@ -3,11 +3,11 @@ module NinjaModel
 
     PREDICATES = [:eq, :ne, :gt, :gte, :lt, :lte, :in]
 
-    attr_reader :attribute, :method, :value
+    attr_reader :attribute, :meth, :value
 
-    def initialize(attribute, method, *args)
+    def initialize(attribute, meth, *args)
       @attribute = attribute
-      @method = method
+      @meth = meth
       @valued = !args.blank?
       @value = args.blank? ? nil : args.first
     end
@@ -22,7 +22,7 @@ module NinjaModel
     end
 
     def test(suspect)
-      case method
+      case meth
       when :eq
         suspect.eql?(value)
       when :ne

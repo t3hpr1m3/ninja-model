@@ -1,13 +1,10 @@
 module NinjaModel
-  module Reflection
-    extend ActiveSupport::Concern
-
-    module ClassMethods
+  class Base
+    class << self
       def create_reflection(macro, name, options, ninja_model)
         case macro
         when :has_many, :belongs_to, :has_one
-          reflection = AssociationReflection.new(macro, name, options, ninja_model)
-        when :composed_of
+          reflection = Reflection::AssociationReflection.new(macro, name, options, ninja_model)
         end
         write_inheritable_hash :reflections, name => reflection
         reflection
@@ -25,9 +22,12 @@ module NinjaModel
       end
 
       def reflect_on_association(association)
-        reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+        reflections[association].is_a?(Reflection::AssociationReflection) ? reflections[association] : nil
       end
     end
+  end
+
+  module Reflection
 
     class MacroReflection
       def initialize(macro, name, options, ninja_model)
@@ -75,13 +75,6 @@ module NinjaModel
 
       def association_foreign_key
         @association_foreign_key ||= @options[:association_foreign_key] || class_name.foreign_key
-      end
-
-      def check_validity!
-        check_validity_of_inverse!
-      end
-
-      def check_validity_of_inverse!
       end
 
       def collection?

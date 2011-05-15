@@ -1,5 +1,3 @@
-require 'active_support/core_ext/object/blank'
-
 module NinjaModel
   class Relation
     include QueryMethods, FinderMethods, SpawnMethods
@@ -58,12 +56,12 @@ module NinjaModel
       size.zero?
     end
 
-    protected
-
     alias :inspect! :inspect
     def inspect
       to_a.inspect
     end
+
+    protected
 
     def method_missing(method, *args, &block)
       if Array.method_defined?(method)

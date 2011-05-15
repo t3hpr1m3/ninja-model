@@ -1,22 +1,9 @@
-require 'active_support'
-
 module NinjaModel
+  class Base
+    define_model_callbacks :save, :create, :update, :destroy
+  end
+
   module Persistence
-    extend ActiveSupport::Concern
-    include ActiveModel::AttributeMethods
-
-    module ClassMethods
-      def get(rel)
-      end
-
-      def persist_with(adapter)
-
-      end
-    end
-
-    included do
-      class_inheritable_accessor :persistence_adapter
-    end
 
     def save(*)
       run_callbacks :save do

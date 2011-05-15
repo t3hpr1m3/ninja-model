@@ -2,14 +2,9 @@ module NinjaModel
   module Adapters
     class AbstractAdapter
       attr_reader :config
-      class << self
-        def instance
-          @instance ||= new
-        end
-      end
 
       def initialize(config, logger = nil)
-        @active = nil
+        @active = false
         @config, @logger = config, logger
       end
 
@@ -54,10 +49,6 @@ module NinjaModel
 
       def destroy(model)
         false
-      end
-
-      def raw_connection
-        @connection
       end
     end
   end

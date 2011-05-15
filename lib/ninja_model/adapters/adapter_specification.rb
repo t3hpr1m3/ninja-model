@@ -1,10 +1,10 @@
 module NinjaModel
   module Adapters
     class AdapterSpecification
-      attr_accessor :config, :adapter_method
+      attr_reader :config, :name
 
-      def initialize(config, adapter_method)
-        @config, @adapter_method = config, adapter_method
+      def initialize(config, name)
+        @config, @name = config, name
       end
     end
   end

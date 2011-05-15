@@ -7,3 +7,12 @@ Dir[File.join(File.expand_path('../', __FILE__), 'support/**/*.rb')].each { |f| 
 RSpec.configure do |config|
   config.mock_with :mocha
 end
+
+class DummyLogger
+  def debug(*args)
+  end
+  def warn(*args)
+  end
+end
+
+NinjaModel.set_logger(DummyLogger.new)

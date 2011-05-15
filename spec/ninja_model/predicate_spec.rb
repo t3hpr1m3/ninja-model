@@ -6,7 +6,7 @@ describe NinjaModel::Predicate do
   it { should respond_to(:value=) }
   its(:has_value?) { should be_false }
   its(:attribute) { should eql(:var) }
-  its(:method) { should eql(:ge) }
+  its(:meth) { should eql(:ge) }
 
   it 'should have a value after update' do
     subject.value = 'valued'
@@ -15,6 +15,9 @@ describe NinjaModel::Predicate do
 
   describe 'test' do
     context 'with a @value of 1' do
+      def expectations
+        { :eq => false, :ne => true, :gt => true, :gte => true, :lt => false, :lte => false }
+      end
       NinjaModel::Predicate::PREDICATES.each do |p|
         if p.eql?(:in)
           subject { NinjaModel::Predicate.new(:var, :in, 1) }
@@ -22,21 +25,8 @@ describe NinjaModel::Predicate do
             specify { lambda { subject.test(2) }.should raise_error }
           end
         else
-          before {
-            @pred = NinjaModel::Predicate.new(:var, p, 1)
-            @test_value = 2
-            @expectations = {
-              :eq => false,
-              :ne => true,
-              :gt => true,
-              :gte => false,
-              :lt => false,
-              :lte => false
-            }
-          }
-          subject { @pred }
-          describe "#{subject.instance_variable_get(:@method)} #{@test_value}" do
-            specify { subject.test(@test_value).should eql(@expectations[p]) }
+          describe ":#{p} 2" do
+            specify { NinjaModel::Predicate.new(:var, p, 1).test(2).should eql(expectations[p]) }
           end
         end
       end

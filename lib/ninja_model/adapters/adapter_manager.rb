@@ -1,10 +1,23 @@
 module NinjaModel
   module Adapters
     class AdapterManager
+      class_attribute :registered
+      self.registered = {}
+      class << self
+        def registered?(name)
+          registered.key?(name.to_sym)
+        end
+
+        def register_adapter_class(name, klass)
+          registered[name.to_sym] = klass
+        end
+      end
+
       attr_reader :adapter_pools
 
       def initialize(pools = {})
         @adapter_pools = pools
+        @registered = {}
       end
 
       def create_adapter(name, spec)
@@ -13,13 +26,7 @@ module NinjaModel
 
       def release_active_adapters!
         @adapter_pools.each_value do |pool|
-          pool.release_adapter
-        end
-      end
-
-      def release_reloadable_adapters!
-        @adapter_pools.each_value do |pool|
-          pool.shutdown_reloadable_adapters!
+          pool.release_instance
         end
       end
 
@@ -58,8 +65,8 @@ module NinjaModel
       def call(env)
         @app.call(env)
       ensure
-        unless env.key?('rake.test')
-          NinjaModel::Base.clear_active_instances!
+        unless env.key?('rack.test')
+          NinjaModel::Base.adapter_manager.release_active_adapters!
         end
       end
     end

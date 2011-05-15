@@ -1,55 +1,27 @@
-require 'active_record'
-require 'active_support/concern'
-require 'ninja_model/associations/active_record_proxy'
-require 'ninja_model/associations/ninja_model_proxy'
-
 module NinjaModel
-  module Associations
-    extend ActiveSupport::Concern
 
-    autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
-    autoload :HasOneAssociation, 'ninja_model/associations/has_one_association'
-    autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
-    autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
-
-
-    module ClassMethods
+  class Base
+    class << self
       def has_one(association_id, options = {})
-        if ninja_model?(:has_one, options[:class_name] || association_id)
-          reflection = create_has_one_reflection(association_id, options)
-          association_accessor_methods(reflection, HasOneAssociation)
-          #association_constructor_method(:build, reflection, HasOneAssociation)
-          #association_constructor_method(:create, reflection, HasOneAssociation)
-          #configure_dependency_for_has_one(reflection)
-        else
-          #puts "Setting up has_one proxy for #{association_id}"
-          proxy.handle_association(:has_one, association_id, options)
-        end
+        reflection = create_has_one_reflection(association_id, options)
+        association_accessor_methods(reflection, Associations::HasOneAssociation)
+        # TODO: Implement the build/create association methods
+        #association_constructor_method(:build, reflection, HasOneAssociation)
+        #association_constructor_method(:create, reflection, HasOneAssociation)
+        #configure_dependency_for_has_one(reflection)
       end
 
       def belongs_to(association_id, options = {})
-        if ninja_model?(:belongs_to, options[:class_name] || association_id)
-          reflection = create_belongs_to_reflection(association_id, options)
-          association_accessor_methods(reflection, BelongsToAssociation)
-          #association_constructor_method(:build, reflection, BelongsToAssociation)
-          #association_constructor_method(:create, reflection, BelongsToAssociation)
-        else
-          proxy.handle_association(:belongs_to, association_id, options)
-        end
+        reflection = create_belongs_to_reflection(association_id, options)
+        association_accessor_methods(reflection, Associations::BelongsToAssociation)
+        # TODO: Implement the build/create association methods
+        #association_constructor_method(:build, reflection, BelongsToAssociation)
+        #association_constructor_method(:create, reflection, BelongsToAssociation)
       end
 
       def has_many(association_id, options = {})
-        if ninja_model?(:has_many, association_id)
-          reflection = create_has_many_reflection(association_id, options)
-          collection_accessor_methods(reflection, HasManyAssociation)
-          #collection_accessor_methods(reflection, HasManyAssociation)
-        else
-          proxy.handle_association(:has_many, association_id, options)
-        end
-      end
-
-      def proxy
-        read_inheritable_attribute(:proxy) || write_inheritable_attribute(:proxy, ActiveRecordProxy.new(self))
+        reflection = create_has_many_reflection(association_id, options)
+        collection_accessor_methods(reflection, Associations::HasManyAssociation)
       end
 
       private
@@ -60,7 +32,6 @@ module NinjaModel
 
       def create_has_many_reflection(association, options = {})
         create_reflection(:has_many, association, options, self)
-        #options[:extend] = create_extension_modules(association, extension
       end
 
       def create_belongs_to_reflection(association, options = {})
@@ -74,7 +45,7 @@ module NinjaModel
           if association.nil?
             association = association_proxy_class.new(self, reflection)
             retval = association.reload
-            if retval.nil? and association_proxy_class == BelongsToAssociation
+            if retval.nil? and association_proxy_class == Associations::BelongsToAssociation
               association_instance_set(reflection.name, nil)
               return nil
             end
@@ -99,7 +70,7 @@ module NinjaModel
         end
 
         redefine_method("set_#{reflection.name}_target") do |target|
-          return if target.nil? and association_proxy_class == BelongsToAssociation
+          return if target.nil? and association_proxy_class == Associations::BelongsToAssociation
           association = association_proxy_class.new(self, reflection)
           association.target = target
           association_instance_set(reflection.name, association)
@@ -122,6 +93,14 @@ module NinjaModel
         end
       end
     end
+  end
+
+  module Associations
+
+    autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
+    autoload :HasOneAssociation, 'ninja_model/associations/has_one_association'
+    autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
+    autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
 
     def association_instance_get(name)
       ivar = "@#{name}"
@@ -133,14 +112,6 @@ module NinjaModel
 
     def association_instance_set(name, association)
       instance_variable_set("@#{name}", association)
-    end
-
-    def method_missing(method, *args)
-      if self.class.read_inheritable_attribute(:proxy) && proxy.respond_to?(method)
-        proxy.send(method, *args)
-      else
-        super
-      end
     end
   end
 end

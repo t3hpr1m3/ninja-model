@@ -1,3 +1,5 @@
+require 'active_support/core_ext/date_time/conversions'
+
 module NinjaModel
   class UnsupportedType < NinjaModelError; end
   class InvalidConversion < NinjaModelError; end

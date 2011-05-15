@@ -1,6 +1,5 @@
-require 'active_model'
-require 'active_support'
-require 'active_support/core_ext/hash/indifferent_access'
+require 'rails/all'
+require 'active_support/all'
 
 module NinjaModel
   extend ActiveSupport::Autoload
@@ -18,27 +17,22 @@ module NinjaModel
     def set_logger(logger)
       ::NinjaModel.logger = logger
     end
+
+    def ninja_model?(symbol)
+      klass = symbol.to_s.camelize
+      klass = klass.singularize
+      klass = klass.constantize
+      klass.ancestors.include?(NinjaModel::Base)
+    end
+
+    def configuration
+      Rails.application.config.ninja_model
+    end
   end
 
   class Base
   end
 end
 
-require 'ninja_model/attribute'
-require 'ninja_model/attribute_methods'
 require 'ninja_model/base'
-#require 'ninja_model/configuration'
-#require 'ninja_model/attributes'
-#require 'ninja_model/errors'
-#require 'ninja_model/associations'
-#require 'ninja_model/rails_ext/active_record'
-#require 'ninja_model/adapters'
-#require 'ninja_model/callbacks'
-#require 'ninja_model/identity'
-#require 'ninja_model/persistence'
-#require 'ninja_model/predicate'
-#require 'ninja_model/reflection'
-#require 'ninja_model/relation'
-#require 'ninja_model/scoping'
-#require 'ninja_model/validation'
 require 'ninja_model/railtie'

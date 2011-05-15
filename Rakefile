@@ -1,12 +1,9 @@
 require 'bundler'
-Bundler.setup
 Bundler::GemHelper.install_tasks
 
 require 'rake'
 require 'rake/rdoctask'
 require 'rspec/core/rake_task'
-require 'cucumber'
-require 'cucumber/rake/task'
 
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.verbose = false
@@ -31,8 +28,4 @@ namespace :spec do
     t.rcov_opts = %w{--text-report --sort coverage}
     t.rcov_opts << %w{--exclude gems\/,spec\/}
   end
-end
-
-Cucumber::Rake::Task.new(:features) do |t|
-  t.cucumber_opts = "features --format progress"
 end
