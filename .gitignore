@@ -16,3 +16,4 @@ vendor/plugins/ns_web
 Gemfile.lock
 .bundle
 *.gem
+.rspec
