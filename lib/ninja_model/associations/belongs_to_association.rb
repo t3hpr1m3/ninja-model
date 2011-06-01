@@ -30,6 +30,10 @@ module NinjaModel
       def record_id(record)
         record.send(@reflection.options[:primary_key] || :id)
       end
+
+      def foreign_key_present
+        !@owner[@reflection.primary_key_name].nil?
+      end
     end
   end
 end
