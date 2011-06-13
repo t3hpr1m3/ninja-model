@@ -19,7 +19,7 @@ module NinjaModel
     end
 
     def configuration
-      Rails.application.config.ninja_model
+      @config ||= ActiveSupport::OrderedOptions.new
     end
   end
 

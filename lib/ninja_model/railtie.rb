@@ -1,7 +1,7 @@
 module NinjaModel
   class Railtie < Rails::Railtie
 
-    config.ninja_model = ActiveSupport::OrderedOptions.new
+    config.ninja_model = NinjaModel.configuration
 
     config.app_middleware.insert_after "::ActionDispatch::Callbacks",
       "NinjaModel::Adapters::AdapterManagement"
