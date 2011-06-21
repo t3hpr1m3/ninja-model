@@ -27,6 +27,8 @@ module NinjaModel
     include ActiveModel::Dirty
     include ActiveRecord::Aggregations
     include ActiveRecord::NamedScope
+    include ActiveModel::Serializers::JSON
+    include ActiveModel::Serializers::Xml
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
 
