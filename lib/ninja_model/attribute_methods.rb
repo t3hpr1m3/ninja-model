@@ -1,5 +1,6 @@
 module NinjaModel
   class Base
+    class UnknownAttributeError < NinjaModelError; end
     include ActiveModel::AttributeMethods
     include ActiveModel::Dirty
 
@@ -84,7 +85,7 @@ module NinjaModel
       attributes = new_attributes.stringify_keys
 
       attributes.each do |k,v|
-        respond_to?("#{k}=".to_sym) ? send("#{k}=".to_sym, v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
+        respond_to?("#{k}=".to_sym) ? send("#{k}=".to_sym, v) : raise(NinjaModel::Base::UnknownAttributeError, "unknown attribute: #{k}")
       end
     end
 

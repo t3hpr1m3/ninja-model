@@ -81,6 +81,14 @@ module NinjaModel
       end
     end
 
+    def respond_to?(sym)
+      if self.class.read_inheritable_attribute(:proxy) && proxy.respond_to?(sym)
+        true
+      else
+        super
+      end
+    end
+
     def method_missing(method, *args)
       if self.class.read_inheritable_attribute(:proxy) && proxy.respond_to?(method)
         proxy.send(method, *args)
@@ -104,7 +112,7 @@ module NinjaModel
           end
         end
 
-        @proxy_klass = ninja_model.parent.const_set("#{@klass.model_name}Proxy", Class.new(ActiveRecord::Base))
+        @proxy_klass = ninja_model.parent.const_set("#{@klass.model_name.gsub(/[^a-zA-Z]/, '')}Proxy", Class.new(ActiveRecord::Base))
         @proxy_klass.class_eval do
           cattr_accessor :columns
           self.columns = []
