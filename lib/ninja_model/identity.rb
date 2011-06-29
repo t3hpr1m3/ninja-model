@@ -6,6 +6,10 @@ module NinjaModel
   end
 
   module Identity
+    def to_model
+      self
+    end
+
     def to_param
       send(self.class.primary_key).to_s if persisted?
     end
