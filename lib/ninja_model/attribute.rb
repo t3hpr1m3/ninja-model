@@ -23,6 +23,20 @@ module NinjaModel
     # Most of the following code was taken from ActiveRecord.  Credit to the
     # Rails team is due.
     #
+    def klass
+      case type
+        when :integer       then Fixnum
+        when :float         then Float
+        when :decimal       then BigDecimal
+        when :datetime      then Time
+        when :date          then Date
+        when :timestamp     then Time
+        when :time          then Time
+        when :text, :string then String
+        when :binary        then String
+        when :boolean       then Object
+      end
+    end
 
     def convert(value)
       case type
