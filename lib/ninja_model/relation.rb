@@ -30,6 +30,12 @@ module NinjaModel
       end
     end
 
+    def new(*args, &block)
+      scoping { @klass.new(*args, &block) }
+    end
+
+    alias build new
+
     def to_a
       @records ||= begin
         records = @klass.adapter.read(self)
@@ -63,6 +69,17 @@ module NinjaModel
     alias :inspect! :inspect
     def inspect
       to_a.inspect
+    end
+
+    def scope_for_create
+      Hash[@predicates.find_all { |w|
+        w.respond_to?(:meth) && w.meth == :eq
+      }.map { |where|
+        [
+          where.attribute,
+          where.value
+        ]
+      }]
     end
 
     protected

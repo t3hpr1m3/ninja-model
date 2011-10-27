@@ -90,10 +90,14 @@ module NinjaModel
 
     def initialize(attributes = nil)
       @attributes = attributes_from_model_attributes
-      self.attributes = attributes unless attributes.nil?
       @persisted = false
       @readonly = true
       @destroyed = false
+
+      populate_with_current_scope_attributes
+
+      self.attributes = attributes unless attributes.nil?
+
       result = yield self if block_given?
       _run_initialize_callbacks
       result
@@ -103,9 +107,21 @@ module NinjaModel
       @attributes = record.stringify_keys
       @readonly = @destroyed = false
       @persisted = true
+
+      populate_with_current_scope_attributes
+
       _run_find_callbacks
       _run_initialize_callbacks
       self
+    end
+
+    private
+
+    def populate_with_current_scope_attributes
+      if scope = self.class.send(:current_scoped_methods)
+        create_with = scope.scope_for_create
+        create_with.each { |att, value| self.respond_to?(:"#{att}=") && self.send("#{att}=", value) } if create_with
+      end
     end
   end
 end
