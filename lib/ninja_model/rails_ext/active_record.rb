@@ -107,7 +107,8 @@ module NinjaModel
             @proxy ||= begin
               self.class.proxy.instance(self)
             end
-            @proxy.attributes = self.attributes.delete_if { |k,v| k.eql?('id') }
+            @proxy.attributes = self.attributes #.delete_if { |k,v| k.eql?('id') }
+            @proxy.id = self.id
             @proxy
           end
         end

@@ -77,8 +77,16 @@ module NinjaModel
         end
       end
 
-      def collection_accessor_methods(reflection, association_proxy_class)
+      def collection_accessor_methods(reflection, association_proxy_class, writer = true)
         collection_reader_method(reflection, association_proxy_class)
+
+        if writer
+          redefine_method("#{reflection.name}=") do |new_value|
+            association = send(reflection.name)
+            association.replace(new_value)
+            association
+          end
+        end
       end
 
       def collection_reader_method(reflection, association_proxy_class)

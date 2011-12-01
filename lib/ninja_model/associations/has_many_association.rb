@@ -24,6 +24,10 @@ module NinjaModel
         @relation.to_a.inspect
       end
 
+      def replace(other_array)
+        @current = other_array
+      end
+
       def blank?
         @relation.blank?
       end
