@@ -7,7 +7,9 @@ module NinjaModel
       "NinjaModel::Adapters::AdapterManagement"
 
     initializer 'ninja_model.logger' do |app|
-      NinjaModel::set_logger(Rails.logger)
+      if NinjaModel.logger.nil?
+        NinjaModel::set_logger(Rails.logger)
+      end
     end
 
     initializer 'ninja_model_extend_active_record' do |app|
@@ -17,7 +19,7 @@ module NinjaModel
     end
 
     initializer 'ninja_model_load_specs' do |app|
-      config_path = File.join(app.paths.config.to_a.first, "ninja_model.yml")
+      config_path = File.join(app.paths['config'].to_a.first, "ninja_model.yml")
       if File.exists?(config_path)
         require 'erb'
         require 'yaml'

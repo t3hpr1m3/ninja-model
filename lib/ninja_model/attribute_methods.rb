@@ -4,8 +4,8 @@ module NinjaModel
     include ActiveModel::AttributeMethods
     include ActiveModel::Dirty
 
-    class_inheritable_accessor :model_attributes
-    self.model_attributes = []
+    #class_attribute :model_attributes
+    #self.model_attributes = []
     attribute_method_suffix('', '=', '_before_type_cast')
 
     class << self

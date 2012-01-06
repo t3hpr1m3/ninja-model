@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe NinjaModel::Base do
+  class LintTester < NinjaModel::Base; end
+  subject { LintTester.new }
   it_should_behave_like "ActiveModel"
   before {
     @klass = Class.new(NinjaModel::Base)

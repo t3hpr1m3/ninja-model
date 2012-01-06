@@ -1,6 +1,6 @@
 module NinjaModel
   class Base
-    class_inheritable_accessor :primary_key
+    class_attribute :primary_key
     self.primary_key = :id
     undef_method(:id) if method_defined?(:id)
   end

@@ -18,11 +18,12 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
 
-  s.add_dependency 'activerecord', '~> 3.0.3'
+  s.add_dependency 'activerecord', '~> 3.1.0'
 
-  s.add_development_dependency 'rspec',     '~> 2.2.0'
-  s.add_development_dependency 'mocha',     '~> 0.9.8'
-  s.add_development_dependency 'rcov',      '~> 0.9.9'
-  s.add_development_dependency 'nokogiri',  '~> 1.4.4'
-  s.add_development_dependency 'autotest',  '~> 4.4.6'
+  s.add_development_dependency 'rspec',     	'2.7.0'
+  s.add_development_dependency 'mocha',     	'0.10.0'
+  s.add_development_dependency 'rcov',      	'0.9.11'
+  s.add_development_dependency 'nokogiri', 		'1.5.0'
+  s.add_development_dependency 'guard-rspec',	'0.5.10'
+  s.add_development_dependency 'libnotify',		'0.6.0'
 end

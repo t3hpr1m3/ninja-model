@@ -1,4 +1,4 @@
-require 'active_record/associations/association_proxy'
+require 'active_record/associations/collection_proxy'
 
 module NinjaModel
   module Associations

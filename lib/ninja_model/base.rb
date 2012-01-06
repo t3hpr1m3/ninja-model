@@ -32,10 +32,21 @@ module NinjaModel
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
 
-    class_inheritable_accessor :default_scoping, :instance_writer => false
-    self.default_scoping = []
-
     class << self
+      def inherited(subclass)
+        subclass.class_attribute :model_attributes
+        if self.respond_to?(:model_attributes)
+          subclass.model_attributes = self.model_attributes.dup
+        else
+          subclass.model_attributes = []
+        end
+        subclass.class_attribute :default_scoping
+        if self.respond_to?(:default_scoping)
+          subclass.default_scoping = self.default_scoping.dup
+        else
+          subclass.default_scoping = []
+        end
+      end
 
       delegate :find, :first, :last, :all, :exists?, :to => :scoped
       delegate :where, :order, :limit, :to => :scoped
@@ -62,6 +73,10 @@ module NinjaModel
         self.default_scoping << build_finder_relation(options, default_scoping.pop)
       end
 
+      def current_scope
+        current_scoped_methods
+      end
+
       def current_scoped_methods
         last = scoped_methods.last
         last.is_a?(Proc) ? unscoped(&last) : last
@@ -78,6 +93,31 @@ module NinjaModel
         relation = scope.merge(relation) if scope
         relation
       end
+
+      def compute_type(type_name)
+        if type_name.match(/^::/)
+          # If the type is prefixed with a scope operator then we assume that
+          # the type_name is an absolute reference.
+          ActiveSupport::Dependencies.constantize(type_name)
+        else
+          # Build a list of candidates to search for
+          candidates = []
+          name.scan(/::|$/) { candidates.unshift "#{$`}::#{type_name}" }
+          candidates << type_name
+
+          candidates.each do |candidate|
+            begin
+              constant = ActiveSupport::Dependencies.constantize(candidate)
+              return constant if candidate == constant.to_s
+            rescue NameError => e
+              # We don't want to swallow NoMethodError < NameError errors
+              raise e unless e.instance_of?(NameError)
+            end
+          end
+
+          raise NameError, "uninitialized constant #{candidates.first}"
+        end
+      end
     end
 
     def attributes
@@ -90,6 +130,8 @@ module NinjaModel
 
     def initialize(attributes = nil)
       @attributes = attributes_from_model_attributes
+      @association_cache = {}
+      @aggregation_cache = {}
       @persisted = false
       @readonly = true
       @destroyed = false
@@ -114,6 +156,13 @@ module NinjaModel
       _run_initialize_callbacks
       self
     end
+
+    def derive_class(association_id)
+      klass = association_id.to_s.camelize
+      klass = klass.singularize
+      compute_type(klass)
+    end
+
 
     private
 

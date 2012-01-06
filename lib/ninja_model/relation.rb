@@ -11,6 +11,8 @@ module NinjaModel
     attr_reader :klass, :loaded
 
     attr_accessor :ordering, :predicates, :limit_value, :offset_value
+    attr_accessor :default_scoped
+    alias :default_scoped? :default_scoped
 
     alias :loaded? :loaded
 
@@ -20,6 +22,7 @@ module NinjaModel
     def initialize(klass)
       @klass  = klass
       @loaded = false
+      @default_scoped = false
 
       SINGLE_VALUE_ATTRS.each do |v|
         instance_variable_set("@#{v}_value".to_sym, nil)
@@ -87,8 +90,8 @@ module NinjaModel
     def method_missing(method, *args, &block)
       if Array.method_defined?(method)
         to_a.send(method, *args, &block)
-      elsif @klass.scopes[method]
-        merge(@klass.send(method, *args, &block))
+      elsif @klass.singleton_class.respond_to?(method)
+        merge(@klass.singleton_class.send(method, *args, &block))
       elsif @klass.respond_to?(method)
         scoping { @klass.send(method, *args, &block) }
       else

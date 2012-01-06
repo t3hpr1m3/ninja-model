@@ -16,3 +16,4 @@ class DummyLogger
 end
 
 NinjaModel.set_logger(DummyLogger.new)
+puts "assigned dummy logger"

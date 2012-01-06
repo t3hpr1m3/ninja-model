@@ -10,13 +10,6 @@ module NinjaModel
         reflection
       end
 
-      def ninja_model?(macro, association)
-        klass = association.to_s.camelize
-        klass = klass.singularize unless [:has_one, :belongs_to].include?(macro)
-        klass = klass.constantize
-        defined?(klass) && klass.ancestors.include?(NinjaModel::Base)
-      end
-
       def reflections
         read_inheritable_attribute(:reflections) || write_inheritable_attribute(:reflections, {})
       end
@@ -37,7 +30,7 @@ module NinjaModel
       attr_reader :ninja_model, :name, :macro, :options
 
       def klass
-        @klass ||= class_name.constantize
+        @klass ||= class_name.camelize.constantize
       end
 
       def class_name
@@ -71,6 +64,7 @@ module NinjaModel
 
       def primary_key_name
         @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+        @primary_key_name
       end
 
       def association_foreign_key
@@ -103,7 +97,7 @@ module NinjaModel
         elsif options[:as]
           "#{options[:as]}_id"
         else
-          ninja_model.name.foreign_key
+          ninja_model.name.demodulize.foreign_key
         end
       end
     end

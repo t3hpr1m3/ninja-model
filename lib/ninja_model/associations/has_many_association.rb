@@ -11,6 +11,8 @@ module NinjaModel
       def method_missing(method, *args)
         if @relation.respond_to?(method)
           @relation.send(method, *args)
+        elsif @relation.klass.respond_to?(method)
+          @relation.klass.send(method, *args)
         else
           super
         end

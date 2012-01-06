@@ -4,13 +4,30 @@ module ActiveRecord
   class Base
     class << self
       def has_one_with_ninja_model(association_id, options = {})
-        if NinjaModel.ninja_model?(options[:class_name] || association_id)
-          ninja_proxy.handle_association(:has_one, association_id, options)
+        klass = options[:class_name] || association_id
+        klass = klass.to_s.camelize
+        klass = klass.singularize
+        klass = compute_type(klass)
+        if NinjaModel.ninja_model?(klass)
+          ninja_proxy.handle_association(:has_one, association_id, options.merge({:class_name => klass.name}))
         else
           has_one_without_ninja_model(association_id, options)
         end
       end
       alias_method_chain :has_one, :ninja_model
+
+      def has_many_with_ninja_model(association_id, options = {})
+        klass = options[:class_name] || association_id
+        klass = klass.to_s.camelize
+        klass = klass.singularize
+        klass = compute_type(klass)
+        if NinjaModel.ninja_model?(klass)
+          ninja_proxy.handle_association(:has_many, association_id, options.merge({:class_name => klass.name}))
+        else
+          has_many_without_ninja_model(association_id, options)
+        end
+      end
+      alias_method_chain :has_many, :ninja_model
 
       def reflect_on_association_with_ninja_model(association)
         if read_inheritable_attribute(:ninja_proxy) && ninja_proxy.proxy_klass.reflections.include?(association)
@@ -47,8 +64,11 @@ module NinjaModel
   class Base
     class << self
       def has_one_with_active_record(association_id, options = {})
-        if ninja_model?(:has_one, options[:class_name] || association_id)
-          has_one_without_active_record(association_id, options)
+        klass = options[:class_name] || association_id
+        klass = klass.to_s.camelize
+        klass = compute_type(klass)
+        if NinjaModel.ninja_model?(klass)
+          has_one_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
           proxy.handle_association(:has_one, association_id, options)
         end
@@ -57,8 +77,11 @@ module NinjaModel
       alias_method_chain :has_one, :active_record
 
       def belongs_to_with_active_record(association_id, options = {})
-        if ninja_model?(:belongs_to, options[:class_name] || association_id)
-          belongs_to_without_active_record(association_id, options)
+        klass = options[:class_name] || association_id
+        klass = klass.to_s.camelize
+        klass = compute_type(klass)
+        if NinjaModel.ninja_model?(klass)
+          belongs_to_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
           proxy.handle_association(:belongs_to, association_id, options)
         end
@@ -67,8 +90,11 @@ module NinjaModel
       alias_method_chain :belongs_to, :active_record
 
       def has_many_with_active_record(association_id, options = {})
-        if ninja_model?(:has_many, association_id)
-          has_many_without_active_record(association_id, options)
+        klass = options[:class_name] || association_id
+        klass = klass.to_s.camelize.singularize
+        klass = compute_type(klass)
+        if NinjaModel.ninja_model?(klass)
+          has_many_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
           proxy.handle_association(:has_many, association_id, options)
         end
@@ -120,6 +146,17 @@ module NinjaModel
           def self.column(name, sql_type = nil, default = nil)
             self.columns << ActiveRecord::ConnectionAdapters::Column.new(name, nil, sql_type.to_s, default)
           end
+
+          def self.columns_hash
+            h = {}
+            self.columns.each do |c|
+              h[c.name] = c
+            end
+            h
+          end
+          def self.column_defaults
+            self.columns_hash
+          end
         end
 
         @klass.model_attributes.each do |attr|
@@ -145,7 +182,7 @@ module NinjaModel
       private
 
       def derive_foreign_key
-        "#{@klass.name.underscore}_id".to_sym
+        "#{@klass.name.demodulize.underscore}_id".to_sym
       end
     end
 
@@ -163,7 +200,7 @@ module NinjaModel
           end
         end
 
-        @proxy_klass = active_record.parent.const_set("#{@klass.model_name}Proxy", Class.new(NinjaModel::Base))
+        @proxy_klass = active_record.parent.const_set("#{@klass.model_name.demodulize}Proxy", Class.new(NinjaModel::Base))
 
         @klass.columns_hash.each_pair do |k,v|
           @proxy_klass.send :attribute, k, v.type, v.default, @proxy_klass
@@ -188,7 +225,7 @@ module NinjaModel
       private
 
       def derive_foreign_key
-        "#{@klass.name.underscore}_id".to_sym
+        "#{@klass.name.demodulize.underscore}_id".to_sym
       end
     end
   end
