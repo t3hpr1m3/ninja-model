@@ -1,6 +1,10 @@
-require 'bundler/setup'
-Bundler.require(:default)
+require 'simplecov'
+SimpleCov.start do
+  add_filter 'spec'
+end
+#Bundler.require(:default)
 require 'rspec/core'
+require 'ninja-model'
 
 Dir[File.join(File.expand_path('../', __FILE__), 'support/**/*.rb')].each { |f| require f }
 
@@ -16,4 +20,3 @@ class DummyLogger
 end
 
 NinjaModel.set_logger(DummyLogger.new)
-puts "assigned dummy logger"

@@ -12,11 +12,6 @@ describe NinjaModel::Reflection do
   subject { ReflectionModel }
   it { should respond_to(:create_reflection) }
 
-  describe 'ninja_model?' do
-    specify { NinjaModel::Base.ninja_model?(:has_one, :bare_model).should be_false }
-    specify { NinjaModel::Base.ninja_model?(:has_one, :reflection_model).should be_true }
-  end
-
   describe 'create_reflection' do
     it 'should store the reflections on the class' do
       @klass = Class.new(NinjaModel::Base)

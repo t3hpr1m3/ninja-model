@@ -59,24 +59,20 @@ describe NinjaModel::Adapters::AdapterPool do
   end
 
   describe 'clear_stale_cached_instances!' do
+    let(:thread) { mock('Thread') }
+    before { Thread.stubs(:list).returns([thread]) }
     it 'should reap any instances for dead threads' do
-      @thread = mock('Thread') do
-        stubs(:object_id).returns(Thread.current.object_id)
-        stubs(:alive?).returns(false)
-      end
-      Thread.stubs(:list).returns([@thread])
-      @inst = subject.instance
-      subject.expects(:checkin).with(@inst)
+      thread.stubs(:alive?).returns(false)
+      inst = subject.instance
+      subject.instance_variable_set("@assigned_instances".to_sym, {thread.object_id => inst})
+      subject.expects(:checkin).with(inst)
       subject.send :clear_stale_cached_instances!
     end
     it 'should not reap instances for live threads' do
-      @thread = mock('Thread') do
-        stubs(:object_id).returns(Thread.current.object_id)
-        stubs(:alive?).returns(true)
-      end
-      Thread.stubs(:list).returns([@thread])
-      @inst = subject.instance
-      subject.expects(:checkin).with(@inst).never
+      thread.stubs(:alive?).returns(true)
+      inst = subject.instance
+      subject.instance_variable_set("@assigned_instances".to_sym, {thread.object_id => inst})
+      subject.expects(:checkin).with(inst).never
       subject.send :clear_stale_cached_instances!
     end
   end
