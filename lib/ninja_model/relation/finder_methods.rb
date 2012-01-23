@@ -56,7 +56,11 @@ module NinjaModel
     def find_one(id)
       id = id.id if NinjaModel::Base === id
 
-      where(primary_key.to_sym => id).first
+      record = where(primary_key.to_sym => id).first
+      unless record
+        raise RecordNotFound, "Couldn't find #{@klass.name} with #{primary_key}=#{id}"
+      end
+      record
     end
 
     def find_first
