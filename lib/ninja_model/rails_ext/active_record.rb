@@ -70,7 +70,9 @@ module NinjaModel
         if NinjaModel.ninja_model?(klass)
           has_one_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
-          proxy.handle_association(:has_one, association_id, options)
+          reflection = proxy.handle_association(:has_one, association_id, options)
+          write_inheritable_hash :reflections, association_id => reflection
+          reflection
         end
       end
 
@@ -83,7 +85,9 @@ module NinjaModel
         if NinjaModel.ninja_model?(klass)
           belongs_to_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
-          proxy.handle_association(:belongs_to, association_id, options)
+          reflection = proxy.handle_association(:belongs_to, association_id, options)
+          write_inheritable_hash :reflections, association_id => reflection
+          reflection
         end
       end
 
@@ -96,11 +100,23 @@ module NinjaModel
         if NinjaModel.ninja_model?(klass)
           has_many_without_active_record(association_id, options.merge(:class_name => klass.name.underscore))
         else
-          proxy.handle_association(:has_many, association_id, options)
+          reflection = proxy.handle_association(:has_many, association_id, options)
+          write_inheritable_hash :reflections, association_id => reflection
+          reflection
         end
       end
 
       alias_method_chain :has_many, :active_record
+
+      def reflect_on_association_with_active_record(association_id)
+        if read_inheritable_attribute(:proxy) && proxy.proxy_klass.reflections.include?(association_id)
+          proxy.proxy_klass.reflect_on_association(association_id)
+        else
+          reflect_on_association_without_ninja_model(association)
+        end
+      end
+
+      alias_method_chain :reflect_on_association, :active_record
 
       def proxy
         read_inheritable_attribute(:proxy) || write_inheritable_attribute(:proxy, Associations::ActiveRecordProxy.new(self))
@@ -126,6 +142,7 @@ module NinjaModel
 
   module Associations
     class ActiveRecordProxy
+      attr_reader :proxy_klass
       def initialize(ninja_model)
         @klass = ninja_model
         @klass.class_eval do
