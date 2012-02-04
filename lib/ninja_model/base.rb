@@ -14,6 +14,7 @@ require 'active_record/aggregations'
 
 module NinjaModel
   class Base
+    include Callbacks
     include AttributeMethods
     include Identity
     include Persistence

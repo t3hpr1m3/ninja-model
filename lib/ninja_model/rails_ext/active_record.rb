@@ -112,7 +112,7 @@ module NinjaModel
         if read_inheritable_attribute(:proxy) && proxy.proxy_klass.reflections.include?(association_id)
           proxy.proxy_klass.reflect_on_association(association_id)
         else
-          reflect_on_association_without_ninja_model(association)
+          reflect_on_association_without_active_record(association_id)
         end
       end
 

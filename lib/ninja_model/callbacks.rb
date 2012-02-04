@@ -1,5 +1,9 @@
 module NinjaModel
-  class Base
-    extend ActiveModel::Callbacks
+  module Callbacks
+    extend ActiveSupport::Concern
+
+    included do
+      extend ActiveModel::Callbacks
+    end
   end
 end
