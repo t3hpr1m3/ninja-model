@@ -8,6 +8,10 @@ describe NinjaModel::Attribute do
   RSpec::Matchers.define :convert do |input|
     chain :to do |expected|
       @expected = expected
+
+      failure_message_for_should do |attr|
+        "convert(#{input.inspect}) should be #{@expected.inspect}, but got #{@actual.inspect}"
+      end
     end
 
     match do |attr|

@@ -32,6 +32,7 @@ module NinjaModel
       end
 
       attr_reader :ninja_model, :name, :macro, :options
+      alias :source_macro :macro
 
       def klass
         @klass ||= ninja_model.send(:compute_type, class_name)
@@ -55,8 +56,8 @@ module NinjaModel
         @collection = [:has_many].include?(macro)
       end
 
-      def build_association(*options)
-        klass.new(*options)
+      def build_association(*options, &block)
+        klass.new(*options, &block)
       end
 
       def create_association(*options)
@@ -75,12 +76,25 @@ module NinjaModel
         foreign_key
       end
 
-      def primary_key
-        ninja_model.primary_key
+      def primary_key(klass)
+        klass.primary_key || raise(StandardError, "#{klass} has no primary key defined")
       end
 
       def association_foreign_key
         @association_foreign_key ||= @options[:association_foreign_key] || class_name.foreign_key
+      end
+
+      def ninja_model_primary_key
+        @ninja_model_primary_key ||= options[:primary_key] || primary_key(ninja_model)
+      end
+      alias :active_record_primary_key :ninja_model_primary_key
+
+      def conditions
+        [[options[:conditions]].compact]
+      end
+
+      def chain
+        [self]
       end
 
       def collection?

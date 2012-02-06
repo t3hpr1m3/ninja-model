@@ -1,10 +1,10 @@
 module NinjaModel
+  class AdapterNotSpecified < StandardError; end
+  class InvalidAdapter < StandardError; end
+  class InvalidSpecification < StandardError; end
+
   module Adapters
     extend ActiveSupport::Concern
-
-    class AdapterNotSpecified < StandardError; end
-    class InvalidAdapter < StandardError; end
-    class InvalidSpecification < StandardError; end
 
     autoload :AbstractAdapter, 'ninja_model/adapters/abstract_adapter'
     autoload :AdapterManager, 'ninja_model/adapters/adapter_manager'
@@ -22,27 +22,31 @@ module NinjaModel
 
     module ClassMethods
       def register_adapter(name, klass)
-        Adapters::AdapterManager.register_adapter_class(name, klass)
+        if klass.ancestors.include?(NinjaModel::Adapters::AbstractAdapter)
+          Adapters::AdapterManager.register_adapter_class(name, klass)
+        else
+          raise InvalidAdapter, "Invalid adapter: #{klass}"
+        end
       end
 
       def set_adapter(spec = nil)
         case spec
         when nil
-          raise Adapters::AdapterNotSpecified unless defined?(Rails.env)
+          raise AdapterNotSpecified unless defined?(Rails.env)
           set_adapter(Rails.env)
-        when Adapters::AdapterSpecification
-          self.adapter_manager.create_adapter(name, spec)
         when Symbol, String
           if config = NinjaModel.configuration.specs[spec.to_s]
             set_adapter(config)
           else
-            raise Adapters::InvalidSpecification, "#{spec} is not configured"
+            raise InvalidSpecification, "#{spec} is not configured"
           end
+        when Adapters::AdapterSpecification
+          self.adapter_manager.create_adapter(name, spec)
         else
           spec = spec.symbolize_keys
-          raise Adapters::AdapterNotSpecified, "configuration does not specify adapter" unless spec.key?(:adapter)
+          raise AdapterNotSpecified, "configuration does not specify adapter: #{spec}" unless spec.key?(:adapter)
           adapter_name = spec[:adapter]
-          raise Adapters::InvalidAdapter, "configuration does not specify adapter" unless Adapters::AdapterManager.registered?(adapter_name)
+          raise InvalidAdapter, "configuration does not specify adapter" unless Adapters::AdapterManager.registered?(adapter_name)
           shutdown_adapter
           set_adapter(Adapters::AdapterSpecification.new(spec, adapter_name))
         end

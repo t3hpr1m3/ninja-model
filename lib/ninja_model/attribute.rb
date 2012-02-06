@@ -130,8 +130,11 @@ module NinjaModel
       end
 
       def fallback_string_to_date(string)
-        ::Date.strptime(string, I18n.translate('date.formats.default'))
-        #new_date(*::Date._parse(string, false).values_at(:year, :mon, :mday))
+        begin
+          ::Date.strptime(string, I18n.translate('date.formats.default'))
+        rescue ArgumentError
+          nil
+        end
       end
 
       def fallback_string_to_time(string)

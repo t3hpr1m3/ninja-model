@@ -1,4 +1,5 @@
 require 'active_model'
+require 'active_record'
 require 'active_support/core_ext'
 
 module NinjaModel
@@ -37,6 +38,10 @@ module NinjaModel
   autoload :Reflection
   autoload :Relation
   autoload :Validation
+
+  ActiveSupport.on_load(:active_record) do
+    require 'ninja_model/rails_ext/active_record'
+  end
 end
 
 if defined?(Rails)

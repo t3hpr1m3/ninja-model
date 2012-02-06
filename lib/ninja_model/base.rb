@@ -87,7 +87,6 @@ module NinjaModel
         Thread.current["#{self}_scoped_methods".to_sym] = nil
       end
 
-      private
 
       def build_finder_relation(options = {}, scope = nil)
         relation = options.is_a?(Hash) ? unscoped.apply_finder_options(options) : options
@@ -121,6 +120,20 @@ module NinjaModel
       end
     end
 
+    def assign_attributes(new_attributes, options = {})
+      return unless new_attributes
+
+      attributes = new_attributes.stringify_keys
+
+      attributes.each do |k, v|
+        if respond_to?("#{k}=")
+          send("#{k}=", v)
+        else
+          raise(StandardError, "unknown attribute: #{k}")
+        end
+      end
+    end
+
     def attributes
       self.class.attribute_names.inject({}) { |h, v|
         h[v] = read_attribute(v); h
@@ -139,9 +152,8 @@ module NinjaModel
 
       self.attributes = attributes unless attributes.nil?
 
-      result = yield self if block_given?
-      _run_initialize_callbacks
-      result
+      yield self if block_given?
+      run_callbacks :initialize
     end
 
     def instantiate(record)

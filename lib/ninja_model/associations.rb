@@ -4,6 +4,7 @@ module NinjaModel
 
     autoload :Association, 'ninja_model/associations/association'
     autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
+    autoload :AssociationScope, 'ninja_model/associations/association_scope'
     autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
     autoload :CollectionAssociation, 'ninja_model/associations/collection_association'
     autoload :CollectionProxy, 'ninja_model/associations/collection_proxy'

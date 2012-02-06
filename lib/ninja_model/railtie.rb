@@ -12,12 +12,6 @@ module NinjaModel
       end
     end
 
-    initializer 'ninja_model_extend_active_record' do |app|
-      ActiveSupport.on_load(:active_record) do
-        require 'ninja_model/rails_ext/active_record'
-      end
-    end
-
     initializer 'ninja_model_load_specs' do |app|
       config_path = File.join(app.paths['config'].to_a.first, "ninja_model.yml")
       if File.exists?(config_path)

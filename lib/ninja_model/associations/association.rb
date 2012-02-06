@@ -1,9 +1,16 @@
 module NinjaModel
   module Associations
-    class Association < ActiveRecord::Associations::Association
+    class Association
 
-      def aliased_table_name
-        raise NotImplementedError
+      attr_reader :owner, :target, :reflection
+
+      delegate :options, :to => :reflection
+
+      def initialize(owner, reflection)
+        @target = nil
+        @owner, @reflection = owner, reflection
+
+        reset
       end
 
       def reset
@@ -11,33 +18,34 @@ module NinjaModel
         @target = nil
       end
 
-      def load_target
-        if find_target?
-          @target ||= find_target
-        end
-        loaded! unless loaded?
-        target
-      rescue NinjaModel::RecordNotFound
-        reset
+      def scoped
+        target_scope.merge(association_scope)
       end
 
-      def interpolate(sql, record = nil)
-        raise NotImplementedError
+      def target_scope
+        klass.scoped
       end
 
       def association_scope
         if klass
-          @association_scope ||= begin
-            scope = klass.unscoped
-            scope = scope.extending(*Array.wrap(options[:extend]))
-            scope = scope.apply_finder_options(options.slice(
-              :readonly, :include, :order, :limit, :joins, :group, :having, :offset))
-            scope
-          end
+          @association_scope ||= AssociationScope.new(self).scope
         end
       end
 
+      def klass
+        reflection.klass
+      end
+
       private
+
+      def build_record(attributes, options)
+        record = reflection.build_association(attributes, options) do |r|
+          attrs = create_scope.except(*r.changed)
+          r.assign_attributes(
+            create_scope.except(*r.changed)
+          )
+        end
+      end
 
       def creation_attributes
         if options[:through]

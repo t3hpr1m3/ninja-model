@@ -23,9 +23,10 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec',     	'~> 2.8.0'
   s.add_development_dependency 'mocha',     	'~> 0.10.0'
-  s.add_development_dependency 'nokogiri', 		'~> 1.5.0'
   s.add_development_dependency 'guard-rspec',	'~> 0.5.10'
   s.add_development_dependency 'libnotify',		'~> 0.6.0'
   s.add_development_dependency 'yard',          '~> 0.7.4'
   s.add_development_dependency 'redcarpet',     '~> 2.0.0'
+  s.add_development_dependency 'sqlite3',       '~> 1.3.5'
+  s.add_development_dependency 'factory_girl',  '~> 2.5.0'
 end

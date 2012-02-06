@@ -9,7 +9,12 @@ module ActiveRecord
         klass = klass.singularize
         klass = compute_type(klass)
         if NinjaModel.ninja_model?(klass)
-          reflection = NinjaModel::Base.create_reflection(macro, name, options, active_record)
+          case macro
+          when :has_many, :belongs_to, :has_one
+            reflection = NinjaModel::Reflection::AssociationReflection.new(macro, name, options, active_record)
+          else
+            raise NotImplementedError, "NinjaModel does not currently support #{macro} associations."
+          end
           self.reflections = self.reflections.merge(name => reflection)
           reflection
         else

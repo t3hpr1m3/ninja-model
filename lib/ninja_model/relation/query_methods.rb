@@ -29,7 +29,6 @@ module NinjaModel
     end
 
     def extending(*modules)
-      puts "modules: #{modules.inspect}"
       modules << Module.new(&Proc.new) if block_given?
 
       return self if modules.empty?
