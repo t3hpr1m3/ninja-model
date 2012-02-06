@@ -10,13 +10,13 @@ module NinjaModel
 
     attr_reader :klass, :loaded
 
-    attr_accessor :ordering, :predicates, :limit_value, :offset_value
+    attr_accessor :ordering, :predicates, :limit_value, :offset_value, :readonly_value
     attr_accessor :default_scoped
     alias :default_scoped? :default_scoped
 
     alias :loaded? :loaded
 
-    SINGLE_VALUE_ATTRS = [:limit, :offset]
+    SINGLE_VALUE_ATTRS = [:limit, :offset, :readonly]
     MULTI_VALUE_ATTRS = [:ordering, :predicates]
 
     def initialize(klass)

@@ -3,59 +3,73 @@ require 'active_record'
 module ActiveRecord
   class Base
     class << self
-      def has_one_with_ninja_model(association_id, options = {})
-        klass = options[:class_name] || association_id
+      def create_reflection(macro, name, options, active_record)
+        klass = options[:class_name] || name
         klass = klass.to_s.camelize
         klass = klass.singularize
         klass = compute_type(klass)
         if NinjaModel.ninja_model?(klass)
-          ninja_proxy.handle_association(:has_one, association_id, options.merge({:class_name => klass.name}))
+          reflection = NinjaModel::Base.create_reflection(macro, name, options, active_record)
+          self.reflections = self.reflections.merge(name => reflection)
+          reflection
         else
-          has_one_without_ninja_model(association_id, options)
-        end
-      end
-      alias_method_chain :has_one, :ninja_model
-
-      def has_many_with_ninja_model(association_id, options = {})
-        klass = options[:class_name] || association_id
-        klass = klass.to_s.camelize
-        klass = klass.singularize
-        klass = compute_type(klass)
-        if NinjaModel.ninja_model?(klass)
-          ninja_proxy.handle_association(:has_many, association_id, options.merge({:class_name => klass.name}))
-        else
-          has_many_without_ninja_model(association_id, options)
-        end
-      end
-      alias_method_chain :has_many, :ninja_model
-
-      def reflect_on_association_with_ninja_model(association)
-        if read_inheritable_attribute(:ninja_proxy) && ninja_proxy.proxy_klass.reflections.include?(association)
-          ninja_proxy.proxy_klass.reflect_on_association(association)
-        else
-          reflect_on_association_without_ninja_model(association)
+          super
         end
       end
 
-      alias_method_chain :reflect_on_association, :ninja_model
+      #def has_one_with_ninja_model(association_id, options = {})
+      #  klass = options[:class_name] || association_id
+      #  klass = klass.to_s.camelize
+      #  klass = klass.singularize
+      #  klass = compute_type(klass)
+      #  if NinjaModel.ninja_model?(klass)
+      #    ninja_proxy.handle_association(:has_one, association_id, options.merge({:class_name => klass.name}))
+      #  else
+      #    has_one_without_ninja_model(association_id, options)
+      #  end
+      #end
+      #alias_method_chain :has_one, :ninja_model
 
-      def ninja_proxy
-        read_inheritable_attribute(:ninja_proxy) || write_inheritable_attribute(:ninja_proxy, NinjaModel::Associations::NinjaModelProxy.new(self))
-      end
+      #def has_many_with_ninja_model(association_id, options = {})
+      #  klass = options[:class_name] || association_id
+      #  klass = klass.to_s.camelize
+      #  klass = klass.singularize
+      #  klass = compute_type(klass)
+      #  if NinjaModel.ninja_model?(klass)
+      #    ninja_proxy.handle_association(:has_many, association_id, options.merge({:class_name => klass.name}))
+      #  else
+      #    has_many_without_ninja_model(association_id, options)
+      #  end
+      #end
+      #alias_method_chain :has_many, :ninja_model
+
+      #def reflect_on_association_with_ninja_model(association)
+      #  if read_inheritable_attribute(:ninja_proxy) && ninja_proxy.proxy_klass.reflections.include?(association)
+      #    ninja_proxy.proxy_klass.reflect_on_association(association)
+      #  else
+      #    reflect_on_association_without_ninja_model(association)
+      #  end
+      #end
+
+      #alias_method_chain :reflect_on_association, :ninja_model
+
+      #def ninja_proxy
+      #  read_inheritable_attribute(:ninja_proxy) || write_inheritable_attribute(:ninja_proxy, NinjaModel::Associations::NinjaModelProxy.new(self))
+      #end
 
     end
 
-    def method_missing(method, *args)
-      begin
-        super
-      rescue NoMethodError => ex
-        if self.class.read_inheritable_attribute(:ninja_proxy) && ninja_proxy.respond_to?(method)
-          ninja_proxy.send(method, *args)
-        else
-          raise ex
-        end
-      end
-    end
+    #def method_missing(method, *args)
+    #  begin
+    #    super
+    #  rescue NoMethodError => ex
+    #    if self.class.read_inheritable_attribute(:ninja_proxy) && ninja_proxy.respond_to?(method)
+    #      ninja_proxy.send(method, *args)
+    #    else
+    #      raise ex
+    #    end
+    #  end
+    #end
   end
 end
 

@@ -1,11 +1,13 @@
 module NinjaModel
-  class Base
-    class_attribute :primary_key
-    self.primary_key = :id
-    undef_method(:id) if method_defined?(:id)
-  end
-
   module Identity
+    extend ActiveSupport::Concern
+
+    included do
+      class_attribute :primary_key
+      self.primary_key = :id
+      undef_method(:id) if method_defined?(:id)
+    end
+
     def to_model
       self
     end

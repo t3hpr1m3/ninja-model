@@ -1,12 +1,19 @@
 module NinjaModel
-  class Base
-    class << self
+  module Reflection
+    extend ActiveSupport::Concern
+
+    included do
+      class_attribute :reflections
+      self.reflections = {}
+    end
+
+    module ClassMethods
       def create_reflection(macro, name, options, ninja_model)
         case macro
         when :has_many, :belongs_to, :has_one
           reflection = Reflection::AssociationReflection.new(macro, name, options, ninja_model)
         end
-        write_inheritable_hash :reflections, name => reflection
+        self.reflections = self.reflections.merge(name => reflection)
         reflection
       end
 
@@ -18,9 +25,6 @@ module NinjaModel
         reflections[association].is_a?(Reflection::AssociationReflection) ? reflections[association] : nil
       end
     end
-  end
-
-  module Reflection
 
     class MacroReflection
       def initialize(macro, name, options, ninja_model)
@@ -30,7 +34,7 @@ module NinjaModel
       attr_reader :ninja_model, :name, :macro, :options
 
       def klass
-        @klass ||= class_name.camelize.constantize
+        @klass ||= ninja_model.send(:compute_type, class_name)
       end
 
       def class_name
@@ -45,6 +49,7 @@ module NinjaModel
     end
 
     class AssociationReflection < MacroReflection
+      attr_accessor :original_build_association_called # :nodoc
       def initialize(macro, name, options, ninja_model)
         super
         @collection = [:has_many].include?(macro)
@@ -62,9 +67,16 @@ module NinjaModel
         klass.create!(*options)
       end
 
+      def foreign_key
+        @foreign_key ||= options[:foreign_key] || derive_foreign_key
+      end
+
       def primary_key_name
-        @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
-        @primary_key_name
+        foreign_key
+      end
+
+      def primary_key
+        ninja_model.primary_key
       end
 
       def association_foreign_key
@@ -79,6 +91,47 @@ module NinjaModel
         !options[:validate].nil? ? options[:validate] : (options[:autosave] == true || macro == :has_many)
       end
 
+      def association_class
+        case macro
+        when :belongs_to
+          Associations::BelongsToAssociation
+        when :has_many
+          Associations::HasManyAssociation
+        when :has_one
+          Associations::HasOneAssociation
+        end
+      end
+
+      def chain
+        [self]
+      end
+
+      def is_a?(c)
+        if c.eql?(ActiveRecord::Reflection::AssociationReflection)
+          true
+        else
+          super
+        end
+      end
+
+      def check_validity!
+        unless options[:polymorphic]
+          if has_inverse? && inverse_of.nil?
+            raise InverseOfAssociationNotFoundError.new(self)
+          end
+        end
+      end
+
+      def has_inverse?
+        @options[:inverse_of]
+      end
+
+      def inverse_of
+        if has_inverse?
+          @inverse_of ||= klass.reflect_on_association(options[:inverse_of])
+        end
+      end
+
       private
 
       def belongs_to?
@@ -91,7 +144,7 @@ module NinjaModel
         class_name
       end
 
-      def derive_primary_key_name
+      def derive_foreign_key
         if belongs_to?
           "#{name}_id"
         elsif options[:as]

@@ -1,25 +1,26 @@
-require 'ninja_model/adapters/abstract_adapter'
-require 'ninja_model/adapters/adapter_manager'
-require 'ninja_model/adapters/adapter_pool'
-require 'ninja_model/adapters/adapter_specification'
-
 module NinjaModel
-
   module Adapters
+    extend ActiveSupport::Concern
+
     class AdapterNotSpecified < StandardError; end
     class InvalidAdapter < StandardError; end
     class InvalidSpecification < StandardError; end
-  end
 
-  class Base
-    class_attribute :adapter_manager
-    self.adapter_manager = NinjaModel::Adapters::AdapterManager.new
+    autoload :AbstractAdapter, 'ninja_model/adapters/abstract_adapter'
+    autoload :AdapterManager, 'ninja_model/adapters/adapter_manager'
+    autoload :AdapterPool, 'ninja_model/adapters/adapter_pool'
+    autoload :AdapterSpecification, 'ninja_model/adapters/adapter_specification'
+
+    included do
+      class_attribute :adapter_manager
+      self.adapter_manager = NinjaModel::Adapters::AdapterManager.new
+    end
 
     def adapter
       self.class.retrieve_adapter
     end
 
-    class << self
+    module ClassMethods
       def register_adapter(name, klass)
         Adapters::AdapterManager.register_adapter_class(name, klass)
       end

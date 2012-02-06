@@ -1,7 +1,29 @@
 module NinjaModel
+  module Associations
+    extend ActiveSupport::Concern
 
-  class Base
-    class << self
+    autoload :Association, 'ninja_model/associations/association'
+    autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
+    autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
+    autoload :CollectionAssociation, 'ninja_model/associations/collection_association'
+    autoload :CollectionProxy, 'ninja_model/associations/collection_proxy'
+    autoload :HasOneAssociation, 'ninja_model/associations/has_one_association'
+    autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
+    autoload :SingularAssociation, 'ninja_model/associations/singular_association'
+
+    def association_instance_get(name)
+      ivar = "@#{name}"
+      if instance_variable_defined?(ivar)
+        association = instance_variable_get(ivar)
+        association if association.respond_to?(:loaded?)
+      end
+    end
+
+    def association_instance_set(name, association)
+      instance_variable_set("@#{name}", association)
+    end
+
+    module ClassMethods
       def has_one(association_id, options = {})
         reflection = create_has_one_reflection(association_id, options)
         association_accessor_methods(reflection, Associations::HasOneAssociation)
@@ -100,26 +122,6 @@ module NinjaModel
           association
         end
       end
-    end
-  end
-
-  module Associations
-
-    autoload :AssociationProxy, 'ninja_model/associations/association_proxy'
-    autoload :HasOneAssociation, 'ninja_model/associations/has_one_association'
-    autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
-    autoload :BelongsToAssociation, 'ninja_model/associations/belongs_to_association'
-
-    def association_instance_get(name)
-      ivar = "@#{name}"
-      if instance_variable_defined?(ivar)
-        association = instance_variable_get(ivar)
-        association if association.respond_to?(:loaded?)
-      end
-    end
-
-    def association_instance_set(name, association)
-      instance_variable_set("@#{name}", association)
     end
   end
 end

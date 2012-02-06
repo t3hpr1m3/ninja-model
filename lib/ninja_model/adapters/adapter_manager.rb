@@ -1,8 +1,10 @@
 module NinjaModel
   module Adapters
     class AdapterManager
+
       class_attribute :registered
       self.registered = {}
+
       class << self
         def registered?(name)
           registered.key?(name.to_sym)

@@ -2,6 +2,8 @@ require 'active_model'
 require 'active_support/core_ext'
 
 module NinjaModel
+  extend ActiveSupport::Autoload
+
   class NinjaModelError < StandardError; end
 
   class << self
@@ -23,12 +25,20 @@ module NinjaModel
     end
   end
 
-  class Base
-  end
+  autoload :Attribute
+  autoload :AttributeMethods
+  autoload :Associations
+  autoload :Adapters
+  autoload :Base
+  autoload :Callbacks
+  autoload :Identity
+  autoload :Persistence
+  autoload :Predicate
+  autoload :Reflection
+  autoload :Relation
+  autoload :Validation
 end
 
-require 'ninja_model/base'
-require 'ninja_model/core_ext/symbol'
 if defined?(Rails)
   require 'ninja_model/railtie'
 end

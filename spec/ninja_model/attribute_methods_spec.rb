@@ -5,8 +5,8 @@ describe NinjaModel::AttributeMethods do
     attribute :test, :string
   end
   subject { AttributeModel.new }
-  specify { subject.attribute_method?(:test).should be_true }
-  specify { subject.attribute_method?(:invalid).should be_false }
+  specify { subject.send(:attribute_method?, 'test').should be_true }
+  specify { subject.send(:attribute_method?, 'invalid').should be_false }
 
   it 'should return a list of valid attribute names' do
     AttributeModel.attribute_names.should eql(['test'])

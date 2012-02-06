@@ -1,5 +1,7 @@
 module NinjaModel
+
   class ConnectionTimeoutError < NinjaModelError; end
+
   module Adapters
     class AdapterPool
       attr_reader :spec, :instances

@@ -1,14 +1,15 @@
-require 'ninja_model/attribute_methods'
-require 'ninja_model/associations'
-require 'ninja_model/adapters'
-require 'ninja_model/callbacks'
-require 'ninja_model/identity'
-require 'ninja_model/persistence'
-require 'ninja_model/predicate'
-require 'ninja_model/reflection'
-require 'ninja_model/relation'
-require 'ninja_model/validation'
-require 'ninja_model/attribute'
+require 'ninja_model/core_ext/symbol'
+#require 'ninja_model/attribute_methods'
+#require 'ninja_model/associations'
+#require 'ninja_model/adapters'
+#require 'ninja_model/callbacks'
+#require 'ninja_model/identity'
+#require 'ninja_model/persistence'
+#require 'ninja_model/predicate'
+#require 'ninja_model/reflection'
+#require 'ninja_model/relation'
+#require 'ninja_model/validation'
+#require 'ninja_model/attribute'
 require 'active_record/named_scope'
 require 'active_record/aggregations'
 
@@ -25,7 +26,6 @@ module NinjaModel
     extend ActiveModel::Translation
     extend ActiveModel::Naming
     include ActiveModel::Observing
-    include ActiveModel::Dirty
     include ActiveRecord::Aggregations
     include ActiveRecord::NamedScope
     include ActiveModel::Serializers::JSON
@@ -35,12 +35,12 @@ module NinjaModel
 
     class << self
       def inherited(subclass)
-        subclass.class_attribute :model_attributes
-        if self.respond_to?(:model_attributes)
-          subclass.model_attributes = self.model_attributes.dup
-        else
-          subclass.model_attributes = []
-        end
+        #subclass.class_attribute :model_attributes
+        #if self.respond_to?(:model_attributes)
+        #  subclass.model_attributes = self.model_attributes.dup
+        #else
+        #  subclass.model_attributes = []
+        #end
         subclass.class_attribute :default_scoping
         if self.respond_to?(:default_scoping)
           subclass.default_scoping = self.default_scoping.dup
@@ -122,14 +122,12 @@ module NinjaModel
     end
 
     def attributes
-      attrs = {}
-      self.class.attribute_names.each { |name|
-        attrs[name] = read_attribute(name)
+      self.class.attribute_names.inject({}) { |h, v|
+        h[v] = read_attribute(v); h
       }
-      attrs
     end
 
-    def initialize(attributes = nil)
+    def initialize(attributes = nil, options = {})
       @attributes = attributes_from_model_attributes
       @association_cache = {}
       @aggregation_cache = {}

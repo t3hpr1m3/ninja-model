@@ -22,6 +22,23 @@ module NinjaModel
       relation
     end
 
+    def readonly(value)
+      relation = clone
+      relation.readonly_value = value
+      relation
+    end
+
+    def extending(*modules)
+      puts "modules: #{modules.inspect}"
+      modules << Module.new(&Proc.new) if block_given?
+
+      return self if modules.empty?
+
+      relation = clone
+      relation.send(:apply_modules, modules.flatten)
+      relation
+    end
+
     private
 
     def build_predicates(opts, other = [])
