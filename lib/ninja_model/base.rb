@@ -1,15 +1,4 @@
 require 'ninja_model/core_ext/symbol'
-#require 'ninja_model/attribute_methods'
-#require 'ninja_model/associations'
-#require 'ninja_model/adapters'
-#require 'ninja_model/callbacks'
-#require 'ninja_model/identity'
-#require 'ninja_model/persistence'
-#require 'ninja_model/predicate'
-#require 'ninja_model/reflection'
-#require 'ninja_model/relation'
-#require 'ninja_model/validation'
-#require 'ninja_model/attribute'
 require 'active_record/named_scope'
 require 'active_record/aggregations'
 
@@ -32,22 +21,13 @@ module NinjaModel
     include ActiveModel::Serializers::Xml
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
+    class_attribute :pluralize_table_names, :instance_writer => false
+    self.pluralize_table_names = true
+
+    class_attribute :default_scopes
+    self.default_scopes = []
 
     class << self
-      def inherited(subclass)
-        #subclass.class_attribute :model_attributes
-        #if self.respond_to?(:model_attributes)
-        #  subclass.model_attributes = self.model_attributes.dup
-        #else
-        #  subclass.model_attributes = []
-        #end
-        subclass.class_attribute :default_scoping
-        if self.respond_to?(:default_scoping)
-          subclass.default_scoping = self.default_scoping.dup
-        else
-          subclass.default_scoping = []
-        end
-      end
 
       delegate :find, :first, :last, :all, :exists?, :to => :scoped
       delegate :where, :order, :limit, :to => :scoped
@@ -66,12 +46,12 @@ module NinjaModel
 
       def scoped_methods
         key = "#{self}_scoped_methods".to_sym
-        Thread.current[key] = Thread.current[key].presence || self.default_scoping.dup
+        Thread.current[key] = Thread.current[key].presence || self.default_scopes.dup
       end
 
-      def default_scope(options = {})
-        reset_scoped_methods
-        self.default_scoping << build_finder_relation(options, default_scoping.pop)
+      def default_scope(scope = {})
+        scope = Proc.new if block_given?
+        self.default_scopes = default_scopes + [scope]
       end
 
       def current_scope
@@ -185,3 +165,5 @@ module NinjaModel
     end
   end
 end
+
+ActiveSupport.run_load_hooks(:ninja_model, NinjaModel::Base)

@@ -12,116 +12,75 @@ module NinjaModel
     autoload :HasManyAssociation, 'ninja_model/associations/has_many_association'
     autoload :SingularAssociation, 'ninja_model/associations/singular_association'
 
-    def association_instance_get(name)
-      ivar = "@#{name}"
-      if instance_variable_defined?(ivar)
-        association = instance_variable_get(ivar)
-        association if association.respond_to?(:loaded?)
+    module Builder
+      autoload :Association, 'ninja_model/associations/builder/association'
+      autoload :SingularAssociation, 'ninja_model/associations/builder/singular_association'
+      autoload :CollectionAssociation, 'ninja_model/associations/builder/collection_association'
+      autoload :HasMany, 'ninja_model/associations/builder/has_many'
+      autoload :BelongsTo, 'ninja_model/associations/builder/belongs_to'
+      autoload :HasOne, 'ninja_model/associations/builder/has_one'
+    end
+
+    attr_reader :association_cache
+
+    def association(name)
+      association = association_instance_get(name)
+
+      if association.nil?
+        reflection = self.class.reflect_on_association(name)
+        association = reflection.association_class.new(self, reflection)
+        association_instance_set(name, association)
       end
+      association
+    end
+
+    private
+
+    def association_instance_get(name)
+      @association_cache[name.to_sym]
     end
 
     def association_instance_set(name, association)
-      instance_variable_set("@#{name}", association)
+      @association_cache[name.to_sym] = association
     end
 
     module ClassMethods
-      def has_one(association_id, options = {})
-        reflection = create_has_one_reflection(association_id, options)
-        association_accessor_methods(reflection, Associations::HasOneAssociation)
-        # TODO: Implement the build/create association methods
-        #association_constructor_method(:build, reflection, HasOneAssociation)
-        #association_constructor_method(:create, reflection, HasOneAssociation)
-        #configure_dependency_for_has_one(reflection)
+      def add_autosave_association_callbacks(reflection)
+      end
+      def has_one(name, options = {})
+        klass = compute_klass(name, :has_one, options)
+        if NinjaModel.ninja_model?(klass)
+          Builder::HasOne.build(self, name, options)
+        else
+          ActiveRecord::Associations::Builder::HasOne.build(self, name, options)
+        end
       end
 
-      def belongs_to(association_id, options = {})
-        reflection = create_belongs_to_reflection(association_id, options)
-        association_accessor_methods(reflection, Associations::BelongsToAssociation)
-        # TODO: Implement the build/create association methods
-        #association_constructor_method(:build, reflection, BelongsToAssociation)
-        #association_constructor_method(:create, reflection, BelongsToAssociation)
+      def belongs_to(name, options = {}, &extension)
+        klass = compute_klass(name, :belongs_to, options)
+        if NinjaModel.ninja_model?(klass)
+          Builder::BelongsTo.build(self, name, options)
+        else
+          ActiveRecord::Associations::Builder::BelongsTo.build(self, name, options)
+        end
       end
 
-      def has_many(association_id, options = {})
-        reflection = create_has_many_reflection(association_id, options)
-        collection_accessor_methods(reflection, Associations::HasManyAssociation)
+      def has_many(name, options = {}, &extension)
+        klass = compute_klass(name, :has_many, options)
+        if NinjaModel.ninja_model?(klass)
+          Builder::HasMany.build(self, name, options)
+        else
+          ActiveRecord::Associations::Builder::HasMany.build(self, name, options)
+        end
       end
 
       private
 
-      def create_has_one_reflection(association, options = {})
-        create_reflection(:has_one, association, options, self)
-      end
-
-      def create_has_many_reflection(association, options = {})
-        create_reflection(:has_many, association, options, self)
-      end
-
-      def create_belongs_to_reflection(association, options = {})
-        create_reflection(:belongs_to, association, options, self)
-      end
-
-      def association_accessor_methods(reflection, association_proxy_class)
-        redefine_method(reflection.name) do |*params|
-          association = association_instance_get(reflection.name)
-
-          if association.nil?
-            association = association_proxy_class.new(self, reflection)
-            retval = association.reload
-            if retval.nil? and association_proxy_class == Associations::BelongsToAssociation
-              association_instance_set(reflection.name, nil)
-              return nil
-            end
-            association_instance_set(reflection.name, association)
-          end
-          association.target.nil? ? nil : association
-        end
-
-        redefine_method("loaded_#{reflection.name}?") do
-          association = association_instance_get(reflection.name)
-          association && association.loaded?
-        end
-
-        redefine_method("#{reflection.name}=") do |new_value|
-          association = association_instance_get(reflection.name)
-          if association.nil? || association.target != new_value
-            association = association_proxy_class.new(self, reflection)
-          end
-
-          association.replace(new_value)
-          association_instance_set(reflection.name, new_value.nil? ? nil : association)
-        end
-
-        redefine_method("set_#{reflection.name}_target") do |target|
-          return if target.nil? and association_proxy_class == Associations::BelongsToAssociation
-          association = association_proxy_class.new(self, reflection)
-          association.target = target
-          association_instance_set(reflection.name, association)
-        end
-      end
-
-      def collection_accessor_methods(reflection, association_proxy_class, writer = true)
-        collection_reader_method(reflection, association_proxy_class)
-
-        if writer
-          redefine_method("#{reflection.name}=") do |new_value|
-            association = send(reflection.name)
-            association.replace(new_value)
-            association
-          end
-        end
-      end
-
-      def collection_reader_method(reflection, association_proxy_class)
-        redefine_method(reflection.name) do |*params|
-          association = association_instance_get(reflection.name)
-
-          if association.nil?
-            association = association_proxy_class.new(self, reflection)
-          end
-          association_instance_set(reflection.name, association)
-          association
-        end
+      def compute_klass(name, macro, options)
+        klass = options[:class_name] || name
+        klass = klass.to_s.camelize
+        klass = klass.singularize if macro.eql?(:has_many)
+        klass = compute_type(klass)
       end
     end
   end

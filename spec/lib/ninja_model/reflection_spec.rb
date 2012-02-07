@@ -14,15 +14,13 @@ describe NinjaModel::Reflection do
 
   describe 'create_reflection' do
     it 'should store the reflections on the class' do
-      @klass = Class.new(NinjaModel::Base)
-      @reflection = @klass.create_reflection(:has_one, :target_model, {}, @klass)
-      @klass.reflections.should eql(:target_model => @reflection)
+      @reflection = ReflectionModel.create_reflection(:has_one, :target_model, {}, TargetModel)
+      ReflectionModel.reflections.should eql(:target_model => @reflection)
     end
 
     it 'should return a reflection for a particular association' do
-      @klass = Class.new(NinjaModel::Base)
-      @reflection = @klass.create_reflection(:has_one, :target_model, {}, @klass)
-      @klass.reflect_on_association(:target_model).should eql(@reflection)
+      @reflection = ReflectionModel.create_reflection(:has_one, :target_model, {}, TargetModel)
+      ReflectionModel.reflect_on_association(:target_model).should eql(@reflection)
     end
 
     context 'has_one' do
@@ -30,7 +28,7 @@ describe NinjaModel::Reflection do
       its(:class_name) { should eql('TargetModel') }
       its(:klass) { should eql(TargetModel) }
       its(:collection?) { should be_false }
-      its(:primary_key_name) { should eql('reflection_model_id') }
+      its(:foreign_key) { should eql('reflection_model_id') }
       its(:association_foreign_key) { should eql('target_model_id') }
       its(:belongs_to?) { should be_false }
     end
@@ -40,7 +38,7 @@ describe NinjaModel::Reflection do
       its(:class_name) { should eql('TargetModel') }
       its(:klass) { should eql(TargetModel) }
       its(:collection?) { should be_true }
-      its(:primary_key_name) { should eql('reflection_model_id') }
+      its(:foreign_key) { should eql('reflection_model_id') }
       its(:association_foreign_key) { should eql('target_model_id') }
       its(:belongs_to?) { should be_false }
     end
@@ -50,7 +48,7 @@ describe NinjaModel::Reflection do
       its(:class_name) { should eql('ReflectionModel') }
       its(:klass) { should eql(ReflectionModel) }
       its(:collection?) { should be_false }
-      its(:primary_key_name) { should eql('reflection_model_id') }
+      its(:foreign_key) { should eql('reflection_model_id') }
       its(:association_foreign_key) { should eql('reflection_model_id') }
       its(:belongs_to?) { should be_true }
     end

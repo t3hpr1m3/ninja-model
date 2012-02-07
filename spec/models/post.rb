@@ -8,4 +8,6 @@ class Post < NinjaModel::Base
 
   belongs_to :user
   has_one :body
+  has_many :tags
+  has_many :categories
 end

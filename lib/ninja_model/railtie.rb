@@ -22,8 +22,5 @@ module NinjaModel
         NinjaModel.logger.warn "[ninja-model] *WARNING* Unable to find configuration file at #{config_path}"
       end
     end
-
-    config.after_initialize do |app|
-    end
   end
 end

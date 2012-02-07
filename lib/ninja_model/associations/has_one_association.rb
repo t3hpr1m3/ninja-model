@@ -6,20 +6,18 @@ module NinjaModel
         raise_on_type_mismatch(record) if record
         load_target
 
-        reflection.klass.transaction do
-          if target && target != record
-            remove_target!(options[:dependent]) unless target.destroyed?
-          end
+        if target && target != record
+          remove_target!(options[:dependent]) unless target.destroyed?
+        end
 
-          if record
-            set_owner_attributes(record)
-            set_inverse_instance(record)
+        if record
+          set_owner_attributes(record)
+          set_inverse_instance(record)
 
-            if owner.persisted? && save && !record.save
-              nullify_owner_attributes(record)
-              set_owner_attributes(target) if target
-              raise RecordNotSaved, "Failed to save the new associated #{reflection.name}."
-            end
+          if owner.persisted? && save && !record.save
+            nullify_owner_attributes(record)
+            set_owner_attributes(target) if target
+            raise RecordNotSaved, "Failed to save the new associated #{reflection.name}."
           end
         end
 
@@ -46,7 +44,7 @@ module NinjaModel
         replace(record, false)
       end
 
-      def remote_target!(method)
+      def remove_target!(method)
         if method.in?([:delete, :destroy])
           target.send(method)
         else

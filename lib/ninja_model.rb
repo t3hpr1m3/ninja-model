@@ -15,10 +15,10 @@ module NinjaModel
     end
 
     def ninja_model?(symbol)
-      klass = symbol.to_s.camelize
-      klass = klass.singularize
-      klass = klass.constantize
-      klass.ancestors.include?(NinjaModel::Base)
+      #klass = symbol.to_s.camelize
+      #klass = klass.singularize
+      #klass = symbol.constantize
+      symbol.ancestors.include?(NinjaModel::Base)
     end
 
     def configuration
@@ -41,6 +41,7 @@ module NinjaModel
 
   ActiveSupport.on_load(:active_record) do
     require 'ninja_model/rails_ext/active_record'
+    include ActiveRecord::NinjaModelExtensions::ReflectionExt
   end
 end
 

@@ -29,6 +29,8 @@ init_active_record
 
 class DummyLogger
   def debug(*args)
+    #puts "*** DEBUG ***"
+    #puts args
   end
   def warn(*args)
     puts "*** WARNING ***"

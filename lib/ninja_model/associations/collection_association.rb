@@ -2,6 +2,8 @@ module NinjaModel
   module Associations
     class CollectionAssociation < Association
       attr_reader :proxy
+      delegate :select, :find, :first, :last, :count, :size, :length,
+        :empty?, :any?, :to => :scoped
 
       def initialize(owner, reflection)
         super
@@ -28,13 +30,13 @@ module NinjaModel
       #  end
       #end
 
-      #def first(*args)
-      #  first_or_last(:first, *args)
-      #end
+      def first(*args)
+        first_or_last(:first, *args)
+      end
 
-      #def last(*args)
-      #  first_or_last(:last, *args)
-      #end
+      def last(*args)
+        first_or_last(:last, *args)
+      end
 
       def build(attributes = {}, options = {}, &block)
         if attributes.is_a?(Array)
@@ -60,11 +62,12 @@ module NinjaModel
         record
       end
 
-      #private
+      private
 
-      #def find_target
-      #  scoped.all
-      #end
+      def find_target
+        puts "find_target for #{self}"
+        scoped.all
+      end
 
       #def create_record(attributes, options, raise = false, &block)
       #  unless owner.persisted?
@@ -89,12 +92,12 @@ module NinjaModel
         scoped.scope_for_create.stringify_keys
       end
 
-      #def first_or_last(type, *args)
-      #  args.shift if args.first.is_a?(Hash) && args.first.empty?
+      def first_or_last(type, *args)
+        args.shift if args.first.is_a?(Hash) && args.first.empty?
 
-      #  collection = scoped.all
-      #  collection.send(type, *args)
-      #end
+        collection = scoped.all
+        collection.send(type, *args)
+      end
     end
   end
 end
