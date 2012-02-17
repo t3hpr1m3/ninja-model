@@ -141,8 +141,6 @@ module NinjaModel
       @readonly = @destroyed = false
       @persisted = true
 
-      populate_with_current_scope_attributes
-
       _run_find_callbacks
       _run_initialize_callbacks
       self
@@ -158,9 +156,12 @@ module NinjaModel
     private
 
     def populate_with_current_scope_attributes
-      if scope = self.class.send(:current_scoped_methods)
-        create_with = scope.scope_for_create
-        create_with.each { |att, value| self.respond_to?(:"#{att}=") && self.send("#{att}=", value) } if create_with
+      return unless self.class.scope_attributes?
+
+      puts "scope_attributes: #{self.class.scope_attributes.inspect}"
+
+      self.class.scope_attributes.each do |att, value|
+        send("#{att}=", value) if respond_to?("#{att}=")
       end
     end
   end
