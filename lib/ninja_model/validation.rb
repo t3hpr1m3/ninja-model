@@ -5,6 +5,7 @@ module NinjaModel
 
     included do
       include ActiveModel::Validations
+      include ActiveModel::Validations::Callbacks
       define_model_callbacks :validation
     end
 
