@@ -12,7 +12,7 @@ doc/plugins
 doc/*.dot
 coverage/*
 *.sw?
-vendor/plugins/ns_web
+vendor/bundle
 Gemfile.lock
 .bundle
 *.gem
