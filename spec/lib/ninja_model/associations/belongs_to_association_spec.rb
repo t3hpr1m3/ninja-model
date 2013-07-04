@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe NinjaModel::Associations::BelongsToAssociation do
-  let(:user) { Factory(:user) }
-  let(:post) { Factory(:post, :user_id => user.id) }
+  let(:user) { FactoryGirl.create(:user) }
+  let(:post) { FactoryGirl.create(:post, user_id: user.id) }
 
   context 'with an ActiveRecord parent' do
     describe 'accessing the association directly' do
@@ -28,12 +28,12 @@ describe NinjaModel::Associations::BelongsToAssociation do
       describe 'accessing the association directly' do
         it 'should trigger a fetch' do
           NinjaModel::Relation.any_instance.expects(:to_a).returns(post)
-          t = Tag.new(:post_id => post.id)
+          t = Tag.new(post_id: post.id)
           t.post
         end
 
         it 'should assign the proper predicates' do
-          t = Tag.new(:post_id => post.id)
+          t = Tag.new(post_id: post.id)
           predicates = t.association(:post).scoped.predicates
           predicates.count.should eql(1)
           predicates.first.attribute.should eql(:id)
@@ -47,12 +47,12 @@ describe NinjaModel::Associations::BelongsToAssociation do
       describe 'accessing the association directly' do
         it 'should trigger a fetch' do
           NinjaModel::Relation.any_instance.expects(:to_a).returns(post)
-          c = Category.new(:post_id => post.id)
+          c = Category.new(post_id: post.id)
           c.post
         end
 
         it 'should assign the proper predicates' do
-          c = Category.new(:post_id => post.id)
+          c = Category.new(post_id: post.id)
           predicates = c.association(:post).scoped.predicates
           predicates.count.should eql(1)
           predicates.first.attribute.should eql(:id)
@@ -68,7 +68,7 @@ describe NinjaModel::Associations::BelongsToAssociation do
     end
 
     it 'should properly update the ids when assigning a new instance' do
-      t = Factory(:tag)
+      t = FactoryGirl.create(:tag)
       t.post = post
       t.post_id.should eql(post.id)
     end

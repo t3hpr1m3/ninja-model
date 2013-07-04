@@ -14,5 +14,10 @@ describe NinjaModel::Validation do
   it { should respond_to(:valid?) }
 
   describe 'save' do
+    it 'should run the validation callbacks' do
+      subject.expects(:run_callbacks).with(:validation).yields
+      subject.expects(:run_callbacks).with(:validate)
+      subject.save
+    end
   end
 end

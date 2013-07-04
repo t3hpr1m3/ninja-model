@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe NinjaModel::Associations::HasOneAssociation do
-  let(:user) { Factory(:user) }
-  let(:post) { Factory(:post, :user_id => user.id) }
-  let(:bio) { Factory(:bio, :user_id => user.id) }
+  let(:user) { FactoryGirl.create(:user) }
+  let(:post) { FactoryGirl.create(:post, user: user) }
+  let(:bio) { FactoryGirl.create(:bio, user: user) }
 
   context 'with an ActiveRecord parent' do
     describe 'accessing the association directly' do
@@ -24,7 +24,7 @@ describe NinjaModel::Associations::HasOneAssociation do
 
   context 'with a NinjaModel parent' do
     context 'and an ActiveRecord child' do
-      let!(:email_address) { Factory(:email_address, :bio_id => bio.id) }
+      let!(:email_address) { FactoryGirl.create(:email_address, bio: bio) }
       describe 'accessing the association directly' do
         it 'should retrieve the record' do
           bio.email_address.should be_kind_of(EmailAddress)
@@ -38,12 +38,12 @@ describe NinjaModel::Associations::HasOneAssociation do
       end
 
       it 'should allow creating the association' do
-        bio.create_email_address(:email => 'foo@bar.com').should be_true
+        bio.create_email_address(email: 'foo@bar.com').should be_true
       end
     end
 
     context 'and a NinjaModel child' do
-      let(:body) { Factory(:body, :post_id => post.id) }
+      let(:body) { FactoryGirl.create(:body, post: post) }
       describe 'accessing the association directly' do
         it 'should trigger a fetch' do
           NinjaModel::Relation.any_instance.expects(:to_a).returns([body])
@@ -64,14 +64,14 @@ describe NinjaModel::Associations::HasOneAssociation do
         # We have to stub to_a here because building will try and retrieve the
         # existing record to remove ownership
         #
-        NinjaModel::Relation.any_instance.stubs(:to_a).returns([])
+        NinjaModel::Relation.any_instance.stubs(to_a: [])
         body = post.build_body
         body.should be_kind_of(Body)
         body.post_id.should eql(post.id)
       end
 
       it 'should allow creating the association' do
-        NinjaModel::Relation.any_instance.stubs(:to_a).returns([])
+        NinjaModel::Relation.any_instance.stubs(to_a: [])
         Body.any_instance.stubs(:create).returns(true)
         post.create_body(:text => 'Foobar')
       end

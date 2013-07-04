@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe NinjaModel::Associations::HasManyAssociation do
-  let(:user) { Factory(:user) }
+  let(:user) { FactoryGirl.create(:user) }
 
   context 'with an ActiveRecord parent' do
 
@@ -48,8 +48,8 @@ describe NinjaModel::Associations::HasManyAssociation do
 
   context 'with a NinjaModel parent' do
 
-    let(:post) { Factory(:post) }
-    let!(:tags) { FactoryGirl.create_list(:tag, 2, :post_id => 1) }
+    let(:post) { FactoryGirl.create(:post) }
+    let!(:tags) { FactoryGirl.create_list(:tag, 2, post_id: 1) }
 
     context 'and an ActiveRecord association' do
       it 'should return an Array' do
@@ -61,7 +61,7 @@ describe NinjaModel::Associations::HasManyAssociation do
       end
 
       it 'should allow chaining queries' do
-        post.tags.where(:name => 'Tag 2').count.should eql(1)
+        post.tags.where(name: 'Tag 2').count.should eql(1)
       end
 
       describe 'building an associated object' do
@@ -88,7 +88,7 @@ describe NinjaModel::Associations::HasManyAssociation do
       end
 
       it 'should allow chaining' do
-        predicates = post.categories.where(:name => 'foo').predicates
+        predicates = post.categories.where(name: 'foo').predicates
         predicates.count.should eql(2)
         predicates.first.attribute.should eql(:post_id)
         predicates.first.meth.should eql(:eq)

@@ -2,7 +2,7 @@
 *.cache
 *.log
 *.pid
-tmp/**/*
+tmp/
 doc/*
 .DS_Store
 *.sqlite3
