@@ -21,7 +21,7 @@ module NinjaModel
     protected
 
     def perform_validations(options)
-      perform_validation = options[:validat] != false
+      perform_validation = options[:validate] != false
       perform_validation ? valid?(options[:context]) : true
     end
   end
