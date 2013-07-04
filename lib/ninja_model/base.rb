@@ -152,6 +152,24 @@ module NinjaModel
       compute_type(klass)
     end
 
+    def attribute_for_inspect(attr_name)
+      value = read_attribute(attr_name)
+      if value.is_a?(String) && value.length > 50
+        "#{value[0..50]}...".inspect
+      elsif value.is_a?(Date) || value.is_a?(Time)
+        %("#{value.to_s(:db)}")
+      else
+        value.inspect
+      end
+    end
+
+    def inspect
+      attributes_as_nice_string = self.class.attribute_names.collect { |attr|
+        "#{attr}: #{attribute_for_inspect(attr)}"
+      }.compact.join(', ')
+      "#<#{self.class} #{attributes_as_nice_string}>"
+    end
+
 
     private
 
