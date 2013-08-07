@@ -33,6 +33,7 @@ module NinjaModel
   autoload :Base
   autoload :Callbacks
   autoload :Identity
+  autoload :Marshalling
   autoload :Persistence
   autoload :Predicate
   autoload :Reflection

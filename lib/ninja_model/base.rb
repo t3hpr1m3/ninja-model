@@ -11,6 +11,7 @@ module NinjaModel
     include Validation
     include Adapters
     include Associations
+    include Marshalling
     include Reflection
     extend ActiveModel::Translation
     extend ActiveModel::Naming

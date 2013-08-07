@@ -3,7 +3,7 @@ module NinjaModel
     extend ActiveSupport::Concern
 
     included do
-      define_model_callbacks :save, :create, :update, :destroy
+      define_model_callbacks :save, :create, :update, :destroy, :reload
     end
 
     module InstanceMethods
