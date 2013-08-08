@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = %q{http://github.com/t3hpr1m3/ninja-model.git}
   s.summary     = %q{Pseudo-ORM for Ruby}
   s.description = %q{Pseudo-ORM for Ruby/Rails with an ActiveRecord-like interface}
+  s.license     = %q{MIT}
 
   s.rubyforge_project = s.name
 
