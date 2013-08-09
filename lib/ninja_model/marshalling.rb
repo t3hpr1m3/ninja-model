@@ -25,7 +25,6 @@ module NinjaModel
       def marshal_load(data)
         h = ActiveSupport::JSON.decode(data)
         h.each do |k, v|
-          NinjaModel.logger.debug("k: #{k.to_s}")
           if k.to_s.eql?('attributes')
             @attributes = v
           else
