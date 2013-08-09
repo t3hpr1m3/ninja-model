@@ -24,10 +24,10 @@ module NinjaModel
 
       def marshal_load(data)
         h = ActiveSupport::JSON.decode(data)
-        @attributes = {}
         h.each do |k, v|
-          if k.eql?(:attributes)
-            @attributes[k] = ActiveSupport::JSON.decode(v)
+          NinjaModel.logger.debug("k: #{k.to_s}")
+          if k.to_s.eql?('attributes')
+            @attributes = v
           else
             instance_variable_set(k, v)
           end
