@@ -12,7 +12,7 @@ module NinjaModel
           r
         }
         h['@attributes'] = @attributes.inject({}) { |a, (k, v)|
-          a[k] = ActiveSupport::JSON.encode(v)
+          a[k] = read_attribute(k)
           a
         }
         ActiveSupport::JSON.encode(h)
@@ -21,8 +21,16 @@ module NinjaModel
       def marshal_load(data)
         h = ActiveSupport::JSON.decode(data)
         h.each do |k, v|
-          instance_variable_set(k, v)
+          if k.eql?('@attributes')
+            @attributes = {}
+            v.each do |n, x|
+              write_attribute(n, x)
+            end
+          else
+            instance_variable_set(k, v)
+          end
         end
+
         @association_cache = {}
         @aggregation_cache = {}
       end
