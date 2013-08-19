@@ -15,7 +15,12 @@ module NinjaModel
           a[k] = read_attribute(k)
           a
         }
-        ActiveSupport::JSON.encode(h)
+        begin
+          res = ActiveSupport::JSON.encode(h)
+        rescue IOError => ex
+          pp ex.backtrace
+        end
+        res
       end
 
       def marshal_load(data)

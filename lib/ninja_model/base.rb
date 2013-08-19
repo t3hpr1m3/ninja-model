@@ -13,13 +13,14 @@ module NinjaModel
     include Associations
     include Marshalling
     include Reflection
+    include Serialization
     extend ActiveModel::Translation
     extend ActiveModel::Naming
     include ActiveModel::Observing
     include ActiveRecord::Aggregations
     include ActiveRecord::NamedScope
-    include ActiveModel::Serializers::JSON
-    include ActiveModel::Serializers::Xml
+    #include ActiveModel::Serializers::JSON
+    #include ActiveModel::Serializers::Xml
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
     class_attribute :pluralize_table_names, :instance_writer => false

@@ -38,6 +38,7 @@ module NinjaModel
   autoload :Predicate
   autoload :Reflection
   autoload :Relation
+  autoload :Serialization
   autoload :Validation
 
   ActiveSupport.on_load(:active_record) do

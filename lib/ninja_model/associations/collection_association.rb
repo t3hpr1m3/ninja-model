@@ -56,6 +56,14 @@ module NinjaModel
       #  create_record(attributes, options, true, &block)
       #end
 
+      def load_target
+        if find_target?
+          @target = find_target
+        end
+        loaded!
+        target
+      end
+
       def add_to_target(record)
         yield(record) if block_given?
         @target << record
@@ -65,7 +73,6 @@ module NinjaModel
       private
 
       def find_target
-        puts "find_target for #{self}"
         scoped.all
       end
 

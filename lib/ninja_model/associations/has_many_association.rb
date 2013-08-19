@@ -14,8 +14,6 @@ module NinjaModel
 
       #def association_scope
       #  scope = super
-      #  puts "primary_key: #{reflection.primary_key}"
-      #  puts "foreign_key: #{reflection.foreign_key}"
       #  scope = scope.where(reflection.foreign_key => owner.send(reflection.primary_key))
       #  scope
       #end
