@@ -6,6 +6,9 @@ module NinjaModel
 
   class Attribute
     attr_reader :name, :type, :default
+    attr_accessor :coder
+
+    alias :encoded? :coder
 
     VALID_TYPES = [:string, :integer, :float, :date, :datetime, :boolean]
 
@@ -38,14 +41,18 @@ module NinjaModel
       end
     end
 
-    def convert(value)
+    def type_cast(value)
+      return nil if value.nil?
+      return coder.load(value) if encoded?
+
+      klass = self.class
       case type
-      when :string    then self.class.convert_to_string(value)
-      when :integer   then value.to_i rescue value ? 1 : 0
-      when :float     then value.to_f rescue value ? 1.0 : 0.0
-      when :date      then self.class.string_to_date(value)
-      when :datetime  then self.class.string_to_time(value)
-      when :boolean   then self.class.value_to_boolean(value)
+      when :string, :text  then value
+      when :integer        then value.to_i rescue value ? 1 : 0
+      when :float          then value.to_f rescue value ? 1.0 : 0.0
+      when :date           then klass.string_to_date(value)
+      when :datetime       then self.class.string_to_time(value)
+      when :boolean        then self.class.value_to_boolean(value)
       end
     end
 

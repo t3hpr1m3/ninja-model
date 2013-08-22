@@ -19,8 +19,6 @@ module NinjaModel
     include ActiveModel::Observing
     include ActiveRecord::Aggregations
     include ActiveRecord::NamedScope
-    #include ActiveModel::Serializers::JSON
-    #include ActiveModel::Serializers::Xml
 
     define_model_callbacks :initialize, :find, :touch, :only => :after
     class_attribute :pluralize_table_names, :instance_writer => false
@@ -100,6 +98,11 @@ module NinjaModel
           raise NameError, "uninitialized constant #{candidates.first}"
         end
       end
+
+      def initialize_attributes(attributes, options = {})
+        puts "base initialize atttributes"
+        attributes
+      end
     end
 
     def assign_attributes(new_attributes, options = {})
@@ -132,14 +135,15 @@ module NinjaModel
 
       populate_with_current_scope_attributes
 
-      self.attributes = attributes unless attributes.nil?
+      self.attributes =self.class.initialize_attributes(attributes) unless attributes.nil?
 
       yield self if block_given?
       run_callbacks :initialize
     end
 
     def instantiate(record)
-      @attributes = record.stringify_keys
+      @attributes = self.class.initialize_attributes(record.stringify_keys)
+      puts "@attributes: #{@attributes}"
       @readonly = @destroyed = false
       @persisted = true
 

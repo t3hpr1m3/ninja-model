@@ -20,10 +20,14 @@ module NinjaModel
 
   module AttributeMethods
     extend ActiveSupport::Concern
+    extend ActiveSupport::Autoload
+    include ActiveModel::AttributeMethods
+
+    autoload :Serialization
 
     included do
-      include ActiveModel::AttributeMethods
       include ActiveModel::Dirty
+      include Serialization
       class_attribute :model_attributes
       self.model_attributes = []
       attribute_method_suffix('', '=', '_before_type_cast')
@@ -76,11 +80,31 @@ module NinjaModel
 
     def read_attribute(name)
       name = name.to_s
-      if !(value = @attributes[name]).nil?
-        self.class.model_attributes_hash[name].convert(@attributes[name])
+      @attributes_cache[name] || @attributes_cache.fetch(name) {
+        attr = @attrs_hash.fetch(name) {
+          return @attributes.fetch(name) {
+            if name == 'id' && self.class.primary_key != name
+              read_attribute(self.class.primary_key)
+            end
+          }
+        }
+      }
+
+      value = @attributes.fetch(name) {
+        return block_given? ? yield(name) : nil
+      }
+
+      if self.class.cache_attribute?(name)
+        @attributes_cache[name] = column.type_cast(value)
       else
-        nil
+        column.type_cast value
       end
+      #if !(value = @attributes[name]).nil?
+      #  attr = @a
+      #  self.class.model_attributes_hash[name].type_cast(@attributes[name])
+      #else
+      #  nil
+      #end
     end
 
     def [](attr_name)
